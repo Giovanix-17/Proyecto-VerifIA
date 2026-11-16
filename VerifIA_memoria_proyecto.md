@@ -674,6 +674,7 @@ En cada fase, usa la skill principal y las de apoyo que lista la **§17**.
 - NVIDIA. (2026). *MiniMax-M3.1-Flash — model card*. https://build.nvidia.com/minimaxai/minimax-m3.1-flash
 - NVIDIA. (2026). *Nemotron-3.5-Bolt-E4B — model card*. https://build.nvidia.com/nvidia/nemotron-3.5-bolt-e4b
 - Pedregosa, F., et al. (2011). Scikit-learn: Machine learning in Python. *JMLR, 12*, 2825–2830.
+- Smith, R. (2007). An overview of the Tesseract OCR engine. *ICDAR 2007*, 629–633. IEEE.
 
 ---
 
@@ -704,4 +705,11 @@ la Fase 5, porque es evidencia directa para justificar el Nivel 2 de la cascada.
 usa Python + Playwright en modo headless, lo que hace las pruebas repetibles y deja
 capturas como evidencia para el reporte. Requiere `pip install playwright` y
 `python -m playwright install chromium` una sola vez.
-- Smith, R. (2007). An overview of the Tesseract OCR engine. *ICDAR 2007*, 629–633. IEEE.
+
+**Detalle operativo.** La versión de trabajo, con el artefacto y el criterio de salida de
+cada fase, está en `docs/skills_por_fase.md`. Esta sección y ese documento se mantienen
+sincronizados.
+
+**Gráficas.** En las fases 4, 5, 8 y 9, `scientific-visualization` define el estándar de
+figura (legibilidad, color accesible, exportación) y `matplotlib` es la herramienta que
+lo implementa.

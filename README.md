@@ -31,6 +31,9 @@ Invoke-RestMethod http://localhost:8000/health
 
 Detalle completo en [`docs/instalacion.md`](docs/instalacion.md).
 
+Documentación del proyecto: [plan de trabajo](docs/plan_trabajo.md) ·
+[instalación](docs/instalacion.md) · [skills por fase](docs/skills_por_fase.md).
+
 ## Estado del proyecto
 
 | Fase | Estado |
@@ -52,7 +55,7 @@ Detalle completo en [`docs/instalacion.md`](docs/instalacion.md).
 ├── Dockerfile / docker-compose.yml
 ├── .env.example                 # plantilla; el .env real no se versiona
 ├── data/                        # corpus y capturas de prueba
-├── docs/                        # plan, instalación, guía de anotación, reportes
+├── docs/                        # plan, instalación, skills por fase, guía de anotación, reportes
 ├── notebooks/                   # exploración y entrenamiento
 ├── scripts/                     # generación, depuración, partición, evaluación
 ├── src/verifia/                 # sanitizer, ocr, classifier, explain, api
