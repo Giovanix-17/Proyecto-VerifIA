@@ -12,8 +12,8 @@ Documento de planeación de la Fase 1 (Actividad 1). Fuente de verdad:
 | Docente | Alfredo de Jesús Gutiérrez Gómez |
 | Institución | Universidad Tecnológica de Tabasco — DATIC |
 | Periodo referencial | 29/09/2026 – 28/12/2026 |
-| Versión de este plan | 1.0 (16/11/2026) |
-| Estado | Aprobado para iniciar la Fase 2 |
+| Versión de este plan | 1.2 (16/11/2026) |
+| Estado | Aprobado para iniciar la Fase 2 (16/11/2026) |
 
 ---
 
@@ -102,7 +102,7 @@ flowchart TD
 
 ## Tecnologías
 
-| Componente | Herramienta | Versión objetivo |
+| Componente | Herramienta | Versión objetivo / estado |
 |---|---|---|
 | Lenguaje | Python | 3.12 (imagen Docker) |
 | Servicio web | FastAPI + Uvicorn | `>=0.115` / `>=0.30` |
@@ -113,15 +113,17 @@ flowchart TD
 | LLM | API de NVIDIA (compatible OpenAI) | `deepseek-v4.1-flash`, `minimax-m3.1-flash`, `nemotron-3.5-bolt-e4b` |
 | Frontend | HTML + CSS + JS estático | sin framework ni build |
 | Pruebas | pytest (+ Playwright para E2E) | `>=8` |
-| Contenedor | Docker Desktop 4.x (WSL2) + Compose v2 | instalado el 16/11/2026 |
+| Contenedor | Docker Desktop 4.99 (WSL2) + Docker Compose 5.7 | instalado y verificado el 16/11/2026 |
 
 ---
 
 ## Recursos
 
-**Hardware disponible.** Intel Core i5-12450H, 16 GB de RAM (6 GB asignados a WSL2),
-59 GB libres en disco, Windows 11 Pro. Es suficiente: el modelo pesado corre en la
-nube y solo el OCR y spaCy trabajan en local.
+**Hardware disponible.** Intel Core i5-12450H, 16 GB de RAM (el VM de Docker Desktop
+usa ≈7.6 GB de forma predeterminada; no hay límite explícito de WSL2), ≈47 GB libres
+en disco al cierre de la fase (la imagen y su caché ocupan ≈4 GB), Windows 11 Pro.
+Es suficiente: el modelo pesado corre en la nube y solo el OCR y spaCy trabajan en
+local.
 
 **Tiempo.** 12 semanas referenciales; el orden y las dependencias importan más que
 las fechas exactas.
@@ -215,5 +217,19 @@ gantt
 | Concepto | Responsable | Fecha |
 |---|---|---|
 | Elaboración | Giovani Hernández Arias | 16/11/2026 |
-| Revisión | Alfredo de Jesús Gutiérrez Gómez | Pendiente |
+| Revisión y aprobación | Alfredo de Jesús Gutiérrez Gómez | 16/11/2026 |
 | Cambios posteriores | Se registran como revisión de este archivo y, si afectan el alcance, en la memoria del proyecto | — |
+
+El contenedor cumple el criterio técnico de salida (`docker compose up` en estado
+`healthy`) y el plan quedó aprobado el 16/11/2026. La Fase 1 se considera cerrada y
+habilita el inicio de la Fase 2.
+
+---
+
+## Registro de revisiones
+
+| Versión | Fecha | Cambio |
+|---|---|---|
+| 1.0 | 16/11/2026 | Versión inicial del plan. |
+| 1.1 | 16/11/2026 | Estado de aprobación explícito; recursos y versiones ajustados tras verificar el contenedor. |
+| 1.2 | 16/11/2026 | Aprobación del plan registrada; Fase 1 cerrada. |

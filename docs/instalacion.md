@@ -13,9 +13,9 @@ Fuente: `VerifIA_memoria_proyecto.md` §9 Fase 1 y §15.1 #8 y #10.
 |---|---|---|
 | Sistema operativo | Windows 11 (64 bits) | Windows 11 Pro, build 26300 |
 | RAM | 8 GB (16 GB recomendado) | 15.7 GB |
-| Disco libre | 10 GB | 59 GB |
+| Disco libre | 10 GB | 47 GB (16/11/2026) |
 | CPU | Con virtualización habilitada (VT-x/AMD-V) | i5-12450H, virtualización activa |
-| Docker Desktop | 4.x con motor WSL2 | instalado el 16/11/2026 |
+| Docker Desktop | 4.x con motor WSL2 (Compose ≥ 2) | 4.99 / Compose 5.7, instalado el 16/11/2026 |
 | Clave de API de NVIDIA | Con créditos de prueba | en `.env` (no se versiona) |
 
 ---
@@ -160,11 +160,12 @@ lista vacía → la cuenta no tiene acceso a esos modelos.
 | `Connection refused` en `localhost:8000` | El contenedor aún arranca o falló | `docker compose logs --tail 50` |
 | `TesseractNotFoundError` en local | Tesseract fuera del `PATH` | Reinstalar marcando la opción de `PATH`, o definir `pytesseract.tesseract_cmd` |
 | `OSError: [E050] Can't find model 'es_core_news_md'` | Modelo no descargado | `python -m spacy download es_core_news_md` |
-| La imagen pesa > 1 GB | Se copió `data/` o `.venv` | Revisar `.dockerignore` |
+| La imagen pesa ≈ 2 GB | Tesseract, spaCy, Presidio y OpenCV; es el tamaño esperado | No es un error; revisar `.dockerignore` solo si crece de forma anómala |
 | WSL2 consume toda la RAM | Sin límite configurado | Crear `%USERPROFILE%\.wslconfig` (ver abajo) |
 | `activate.ps1 cannot be loaded` | Política de ejecución | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` |
 
-Límite de memoria para WSL2 (`C:\Users\<usuario>\.wslconfig`):
+Límite de memoria para WSL2 (**opcional**; si quieres acotar la RAM que usa Docker
+Desktop, crea `C:\Users\<usuario>\.wslconfig`):
 
 ```ini
 [wsl2]

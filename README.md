@@ -38,7 +38,7 @@ Documentación del proyecto: [plan de trabajo](docs/plan_trabajo.md) ·
 
 | Fase | Estado |
 |---|---|
-| 1 — Planeación, repositorio y contenedor | Completada |
+| 1 — Planeación, repositorio y contenedor | Completada y aprobada (16/11/2026) |
 | 2 — Corpus etiquetado | Pendiente |
 | 3 — Sanitización | Pendiente |
 | 4 — OCR | Pendiente |

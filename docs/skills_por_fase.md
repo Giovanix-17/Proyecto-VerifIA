@@ -52,7 +52,7 @@ corrige la skill, no la memoria.
 
 ## Checklist por fase
 
-- [x] **Fase 1** — `markdown-mermaid-writing` → plan, instalación, contenedor.
+- [x] **Fase 1** — `markdown-mermaid-writing` → plan, instalación, contenedor. Plan aprobado y contenedor `healthy` (16/11/2026).
 - [ ] **Fase 2** — `verifia-corpus` + `huggingface-datasets` / `exploratory-data-analysis` / `citation-management` → corpus de 500.
 - [ ] **Fase 3** — `verifia-sanitizacion` → módulo de enmascarado y pruebas.
 - [ ] **Fase 4** — `verifia-ocr` + `webapp-testing` (capturas sintéticas) + `scientific-visualization` → CER/WER.
