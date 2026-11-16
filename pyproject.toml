@@ -1,0 +1,19 @@
+# Configuración de herramientas para VerifIA.
+#
+# Las dependencias viven en requirements.txt (ejecución) y requirements-dev.txt
+# (pruebas). El paquete no se instala con pip: se importa con PYTHONPATH=src,
+# que pytest aplica mediante `pythonpath` (ver abajo) y Dockerfile fija con ENV.
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

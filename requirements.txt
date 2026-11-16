@@ -1,0 +1,28 @@
+# Dependencias de ejecución de VerifIA.
+# Se instalan en la imagen Docker (Dockerfile) y en el entorno virtual local.
+
+# --- Servicio web ---
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.30,<1.0
+pydantic>=2.7,<3.0
+python-multipart>=0.0.9,<0.1
+python-dotenv>=1.0,<2.0
+
+# --- LLM (API de NVIDIA, compatible con OpenAI) ---
+openai>=1.30,<4.0
+
+# --- Nivel 1: ML clásico ---
+scikit-learn>=1.4,<2.0
+numpy>=1.26,<3.0
+pandas>=2.1,<4.0
+joblib>=1.4,<2.0
+
+# --- Sanitización (Fase 3) ---
+spacy>=3.8,<3.9
+presidio-analyzer>=2.2,<3.0
+presidio-anonymizer>=2.2,<3.0
+
+# --- OCR (Fase 4) ---
+opencv-python-headless>=4.9,<6.0
+pytesseract>=0.3.10,<0.4
+pillow>=10.0,<14.0

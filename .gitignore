@@ -1,0 +1,34 @@
+# --- Credenciales y entorno ---
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# --- Datos que NO se versionan ---
+# Crudo y sintético: pueden contener datos personales o requerir revisión manual.
+data/raw/*
+data/synthetic/*
+# Capturas de OCR: se regeneran con el script; solo se versionan las transcripciones.
+data/ocr_test/*.png
+data/ocr_test/*.jpg
+data/ocr_test/*.jpeg
+!data/**/.gitkeep
+
+# --- Artefactos temporales ---
+*.log
+*.tmp
+
+# --- Sistema operativo ---
+.DS_Store
+Thumbs.db
+desktop.ini
