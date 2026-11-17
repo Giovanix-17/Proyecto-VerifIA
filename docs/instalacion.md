@@ -130,11 +130,13 @@ Notas del diseño del contenedor:
 | Variable | Para qué sirve | Valor por defecto |
 |---|---|---|
 | `NVIDIA_API_KEY` | Autenticación con la API de NVIDIA | *(obligatoria, sin default)* |
-| `LLM_MODEL` | Modelo del Nivel 2 de la cascada | `deepseek-ai/deepseek-v4.1-flash` |
-| `LLM_REVIEWER_MODEL` | Revisor automático del kappa (distinto del Nivel 2) | `minimaxai/minimax-m3.1-flash` |
+| `LLM_MODEL` | Modelo del Nivel 2 de la cascada | `minimaxai/minimax-m3.1-flash` |
+| `LLM_REVIEWER_MODEL` | Revisor automático del kappa (distinto del Nivel 2) | `meta/muse-glimmer-30b` |
 | `LLM_CORPUS_MODEL` | Generación del corpus sintético | `nvidia/nemotron-3.5-bolt-e4b` |
 | `LLM_TIMEOUT_S` | Timeout por llamada | `60` |
-| `LLM_MAX_TOKENS` | Tope de tokens de salida | `1200` |
+| `LLM_MAX_TOKENS` | Tope de tokens de salida | `1300` |
+| `LLM_MAX_REINTENTOS` | Intentos totales ante 400/429/5xx/timeout | `3` |
+| `LLM_RETRY_BASE_S` | Espera inicial entre reintentos (2, 4, 8 s) | `2` |
 | `LLM_REASONING_EFFORT` | Esfuerzo de razonamiento | `low` |
 | `NVIDIA_BASE_URL` | Endpoint compatible con OpenAI | `https://integrate.api.nvidia.com/v1` |
 
@@ -163,6 +165,7 @@ lista vacía → la cuenta no tiene acceso a esos modelos.
 | La imagen pesa ≈ 2 GB | Tesseract, spaCy, Presidio y OpenCV; es el tamaño esperado | No es un error; revisar `.dockerignore` solo si crece de forma anómala |
 | WSL2 consume toda la RAM | Sin límite configurado | Crear `%USERPROFILE%\.wslconfig` (ver abajo) |
 | `activate.ps1 cannot be loaded` | Política de ejecución | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` |
+| `GET /v1/models 404 Not Found` en los logs del contenedor | Docker Desktop (Gordon / Docker AI) sondea el puerto 8000 cada 30 s como si fuera un servidor compatible con OpenAI; VerifIA solo expone `/health` | Es benigno: la aplicación no usa ese endpoint. Se puede ignorar o desactivar Docker AI/Gordon en Docker Desktop |
 
 Límite de memoria para WSL2 (**opcional**; si quieres acotar la RAM que usa Docker
 Desktop, crea `C:\Users\<usuario>\.wslconfig`):

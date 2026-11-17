@@ -156,7 +156,7 @@ La clave va en `.env` como `NVIDIA_API_KEY`. **Solo se usa la API de NVIDIA**; n
 |---|---|---|
 | **Nivel 2 (cascada)** — principal | `minimaxai/minimax-m3.1-flash` | 428B / 23B activos, *Structured Output* explícito; **único candidato operativo** tras el HTTP 410 de DeepSeek (verificado el 17/11/2026). Licencia "research and development only" en NVIDIA, a citar en el reporte |
 | **Nivel 2 — alternativa** | `deepseek-ai/deepseek-v4.1-flash` (**no disponible**: HTTP 410 desde el 16/11/2026) | Base MIT, 552B / 8B activos, KV cache en FP4 (890 bytes/token) → menor latencia y costo; se conserva como referencia histórica y se reevaluará si NVIDIA lo repone |
-| **Revisor automático** (kappa, §8.7) | `mistralai/mistral-large-4-1t-a52b` | Modelo distinto del Nivel 2 para evitar circularidad. Perfil MoE grande (~1T / 52B activos), instrucciones generales y salida JSON válida; verificado el 17/11/2026 |
+| **Revisor automático** (kappa, §8.7) | `meta/muse-glimmer-30b` | Modelo distinto del Nivel 2 para evitar circularidad. JSON válido en 35.6–36.2 s con el prompt real; Mistral-Large-4 se descartó por latencias de 90–175 s, incompatibles con el timeout de 60 s (verificado el 17/11/2026) |
 | **Generación del corpus** (Fase 2) | `nvidia/nemotron-3.5-bolt-e4b` | 8B (4B efectivos), Apache 2.0, español entre los idiomas focales de su post-training, *Structured Output*; barato y rápido para generar cientos de mensajes |
 
 El modelo se elige con variables de entorno, sin tocar código:
@@ -164,16 +164,18 @@ El modelo se elige con variables de entorno, sin tocar código:
 ```
 NVIDIA_API_KEY=...
 LLM_MODEL=minimaxai/minimax-m3.1-flash        # Nivel 2 (DeepSeek devuelve 410)
-LLM_REVIEWER_MODEL=mistralai/mistral-large-4-1t-a52b   # revisor automático (kappa)
+LLM_REVIEWER_MODEL=meta/muse-glimmer-30b      # revisor automático (kappa)
 LLM_CORPUS_MODEL=nvidia/nemotron-3.5-bolt-e4b     # generación de corpus sintético
 LLM_TIMEOUT_S=60
-LLM_MAX_TOKENS=1200
+LLM_MAX_TOKENS=1300
+LLM_MAX_REINTENTOS=3
+LLM_RETRY_BASE_S=2
 LLM_REASONING_EFFORT=low
 ```
 
 **Parámetros de llamada.** Endpoint `https://integrate.api.nvidia.com/v1/chat/completions`, compatible con la API de OpenAI (`openai` de Python con `base_url` NVIDIA).
 
-- `timeout` 60 s, **1 reintento**, `max_tokens` 1200.
+- `timeout` 60 s, hasta **3 intentos** con espera exponencial (2, 4, 8 s) ante 400/429/5xx/timeout, `max_tokens` 1300.
 - `reasoning_effort` **bajo**: ambos modelos grandes son "razonadores" y emiten un bloque de razonamiento antes de la respuesta; para una tarea de 5 clases el esfuerzo alto solo añade latencia y costo.
 - **Muestreo:** los modelos recomiendan `temperature=1.0`, `top_p=0.95`, pero para una clasificación repetible se prueba en la Fase 5 `temperature=0` contra el valor recomendado y **se conserva el que tenga mayor tasa de JSON válido y mayor acuerdo con las etiquetas humanas**. La comparación queda documentada.
 - **Extracción del JSON:** la respuesta útil viene dentro de `content`, después del bloque de razonamiento (`reasoning_content`). El parser debe **extraer el primer objeto JSON balanceado** del texto, no asumir que todo `content` es JSON. Si la extracción o la validación Pydantic fallan → fallback (regla 8).
@@ -339,7 +341,7 @@ No se cuenta con un segundo anotador humano. Para no dejar vacía la verificaci�
 
 1. **Muestreo** aleatorio estratificado por clase (20 %).
 2. **Insumo:** el texto **ya sanitizado** (nunca el original con PII) + la guía de anotación + la lista cerrada de 5 clases. `temperature=0`, salida JSON con un solo campo `tipologia`.
-3. **Modelo del revisor:** `mistralai/mistral-large-4-1t-a52b` (§6.1), distinto del Nivel 2 para evitar circularidad. La justificación y el sondeo están en `docs/reportes/verificacion_api.md`.
+3. **Modelo del revisor:** `meta/muse-glimmer-30b` (§6.1), distinto del Nivel 2 para evitar circularidad. La justificación y el sondeo están en `docs/reportes/verificacion_api.md`.
 4. **Cálculo:** `cohen_kappa_score` (scikit-learn), matriz de confusión humano↔LLM y porcentaje de coincidencia.
 5. **Adjudicación manual:** en los desacuerdos, el autor decide la etiqueta correcta y registra el motivo. Estos casos son la **cola de revisión manual** que ya exige la regla 9 para los datos sintéticos: el trabajo no se duplica.
 6. **Reporte:** `docs/reportes/kappa_revisor_automatico.md` con el valor de kappa, la tabla de coincidencias, los casos adjudicados y el análisis de errores.
@@ -418,7 +420,7 @@ Cada fase corresponde a una actividad de la propuesta y a un objetivo específic
 - Cálculo de la puntuación y regla de `max()` según §8.6.
 
 **Comparación de modelos LLM (parte de la Fase 5)**
-- Probar `minimaxai/minimax-m3.1-flash` como Nivel 2 sobre el conjunto de validación. La comparación prevista con DeepSeek-V4.1-Flash **no pudo ejecutarse** (HTTP 410); si NVIDIA lo repone, repetirla con el mismo prompt. Como contraste opcional puede usarse `mistralai/mistral-large-4-1t-a52b`.
+- Probar `minimaxai/minimax-m3.1-flash` como Nivel 2 sobre el conjunto de validación. La comparación prevista con DeepSeek-V4.1-Flash **no pudo ejecutarse** (HTTP 410); si NVIDIA lo repone, repetirla con el mismo prompt. Como contraste opcional puede usarse `meta/muse-glimmer-30b`.
 - Criterio objetivo de elección: **% de JSON válido**, **acuerdo con las etiquetas humanas**, **latencia** y **costo por análisis** (tokens de entrada/salida reportados por la API).
 - Probar `temperature=0` contra el muestreo recomendado por el modelo (`1.0`/`top_p=0.95`) y quedarse con el mejor.
 - Se deja documentado el modelo elegido y la comparación completa.
@@ -635,7 +637,7 @@ En cada fase, usa la skill principal y las de apoyo que lista la **§17**.
 | 2 | Enmascarado de `[CODIGO]` | 4–8 dígitos **con contexto de solicitud** (≤30 caracteres); no enmascara montos, %, fechas ni folios |
 | 3 | Puntuación 0–100 | `100 × (1 − P(legitimo))`; en zona gris `max(LLM, Nivel 1)`; fallback = Nivel 1 + "análisis parcial" |
 | 4 | Nivel de riesgo | **Derivado** de la puntuación; en el corpus es opcional y solo referencia |
-| 5 | Límites del sistema | Imagen ≤ 5 MB, ≤ 4000 px, ≤ 12 MP (PNG/JPEG); texto ≤ 10 000 caracteres; LLM timeout 60 s, 1 reintento, `max_tokens` 1200, `reasoning_effort` bajo |
+| 5 | Límites del sistema | Imagen ≤ 5 MB, ≤ 4000 px, ≤ 12 MP (PNG/JPEG); texto ≤ 10 000 caracteres; LLM timeout 60 s, hasta 3 intentos, `max_tokens` 1300, `reasoning_effort` bajo; corpus sintético con `max_tokens` 2600 por lote |
 | 6 | Fiabilidad de la anotación | **Revisor automático con LLM** sobre el 20 % estratificado; se reporta como *acuerdo humano–LLM* (no inter-humano); desacuerdos adjudicados a mano |
 | 7 | Plan de trabajo | La Fase 1 entra como **primer paso del §14**, con entregable `docs/plan_trabajo.md` |
 | 8 | Entorno de ejecución | **Docker Desktop (WSL2)** como opción principal; venv documentado como alternativa |
@@ -645,7 +647,7 @@ En cada fase, usa la skill principal y las de apoyo que lista la **§17**.
 | 12 | Orígenes de los datos | `publico`, `sintetico_llm`, `manual`, `plantilla_legitima`. La regla 9 aplica **solo a `sintetico_llm`** (exclusivo de train) |
 | 13 | Presidio | **Requisito de la Fase 3** (base obligatoria), con reconocedores personalizados para formatos mexicanos y NER `es_core_news_md` |
 | 14 | Modelo de Nivel 2 | `minimaxai/minimax-m3.1-flash` (default operativo); `deepseek-ai/deepseek-v4.1-flash` no disponible por HTTP 410 (17/11/2026) |
-| 15 | Modelo del revisor (kappa) | `mistralai/mistral-large-4-1t-a52b`, distinto del Nivel 2 (evita circularidad) |
+| 15 | Modelo del revisor (kappa) | `meta/muse-glimmer-30b`, distinto del Nivel 2 (evita circularidad); Mistral-Large-4 descartado por latencia |
 | 16 | Modelo de generación de corpus | `nvidia/nemotron-3.5-bolt-e4b` (pequeño, barato, español en su post-training, *Structured Output*) |
 | 17 | Entrada al LLM | **Solo texto sanitizado**; la imagen nunca se envía al modelo |
 | 18 | Caché de respuestas | No se implementa (regla 2) |

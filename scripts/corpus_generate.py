@@ -8,7 +8,7 @@ Fase 2.2 de ``VerifIA_memoria_proyecto.md``. Características:
   definitiva la asigna el autor** (§9 Fase 2 y regla 9);
 - respuesta tolerante: extrae el primer objeto JSON balanceado, aunque el
   modelo añada razonamiento o bloques Markdown;
-- 1 reintento con espera creciente ante 429/5xx/timeout;
+- reintentos con espera creciente ante 400/429/5xx/timeout;
 - salida en ``data/synthetic/generated.jsonl`` + bitácora de llamadas.
 
 Uso (Docker, sin instalar nada en el host)::
@@ -43,6 +43,8 @@ from corpus_common import (
     normalizar_texto,
     resumen,
 )
+
+from verifia.classifier.retry import con_reintentos
 
 SALIDA_DEFECTO = ROOT / "data" / "synthetic" / "generated.jsonl"
 BITACORA_DEFECTO = ROOT / "data" / "synthetic" / "generation_log.jsonl"
@@ -215,7 +217,8 @@ def _cliente() -> Any:
             "de https://build.nvidia.com (nunca la pongas en el código)."
         )
     base_url = os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1")
-    return OpenAI(api_key=api_key, base_url=base_url, timeout=60.0, max_retries=0)
+    timeout = float(os.getenv("LLM_TIMEOUT_S", "60"))
+    return OpenAI(api_key=api_key, base_url=base_url, timeout=timeout, max_retries=0)
 
 
 def _limpiar_senales(valor: Any) -> list[str]:
@@ -254,16 +257,19 @@ def llamar_lote(
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     prompt = construir_prompt(tipologia, cantidad, semilla)
     inicio = time.perf_counter()
-    respuesta = cliente.chat.completions.create(
-        model=modelo,
-        messages=[
-            {"role": "system", "content": SISTEMA},
-            {"role": "user", "content": prompt},
-        ],
-        temperature=1.0,
-        top_p=0.95,
-        max_tokens=max_tokens,
-        extra_body={"reasoning_effort": reasoning_effort},
+    respuesta = con_reintentos(
+        lambda: cliente.chat.completions.create(
+            model=modelo,
+            messages=[
+                {"role": "system", "content": SISTEMA},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=1.0,
+            top_p=0.95,
+            max_tokens=max_tokens,
+            extra_body={"reasoning_effort": reasoning_effort},
+        ),
+        descripcion=f"lote de corpus ({tipologia})",
     )
     latencia = round(time.perf_counter() - inicio, 2)
     contenido = respuesta.choices[0].message.content or ""
@@ -298,7 +304,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--max-tokens",
         type=int,
-        default=2000,
+        default=2600,
         help="tope de salida por lote (el corpus no usa el del Nivel 2)",
     )
     parser.add_argument("--reasoning-effort", default=os.getenv("LLM_REASONING_EFFORT", "low"))

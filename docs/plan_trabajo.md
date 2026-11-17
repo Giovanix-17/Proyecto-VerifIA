@@ -110,7 +110,7 @@ flowchart TD
 | ML clásico | scikit-learn | `>=1.4,<2` |
 | Sanitización | Presidio + spaCy `es_core_news_md` | `>=2.2` / `3.8.x` |
 | OCR | Tesseract 5 (`spa`) + OpenCV headless | `>=4.9` |
-| LLM | API de NVIDIA (compatible OpenAI) | `minimax-m3.1-flash` (Nivel 2 principal), `mistral-large-4-1t-a52b` (revisor), `nemotron-3.5-bolt-e4b` (corpus) |
+| LLM | API de NVIDIA (compatible OpenAI) | `minimax-m3.1-flash` (Nivel 2 principal), `meta/muse-glimmer-30b` (revisor), `nemotron-3.5-bolt-e4b` (corpus) |
 | Frontend | HTML + CSS + JS estático | sin framework ni build |
 | Pruebas | pytest (+ Playwright para E2E) | `>=8` |
 | Contenedor | Docker Desktop 4.99 (WSL2) + Docker Compose 5.7 | instalado y verificado el 16/11/2026 |

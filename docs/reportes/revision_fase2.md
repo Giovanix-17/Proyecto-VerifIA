@@ -143,18 +143,19 @@ reproducción y a la entrega. Es decisión del autor cuándo hacer el commit.
 
 | Rol | Modelo | Resultado |
 |---|---|---|
-| Corpus | `nvidia/nemotron-3.5-bolt-e4b` | ✅ Genera un mensaje válido; latencia ~14 s; con `max_tokens=2000` |
-| Nivel 2 | `minimaxai/minimax-m3.1-flash` | ✅ Devuelve JSON válido; latencia < 6 s |
+| Corpus | `nvidia/nemotron-3.5-bolt-e4b` | ✅ Genera un mensaje válido; latencia ~14–22 s; con `max_tokens=2600` |
+| Nivel 2 | `minimaxai/minimax-m3.1-flash` | ✅ JSON válido; 144–284 tokens de salida; 503 y 400 transitorios cubiertos con reintentos |
 | Nivel 2 anterior | `deepseek-ai/deepseek-v4.1-flash` | ❌ **HTTP 410**; no aparece en `/v1/models` |
-| Revisor | `mistralai/mistral-large-4-1t-a52b` | ✅ JSON válido; 8.24 s |
-| Revisor alternativo | `nvidia/nemotron-3.5-lightning-30b-a3b` | ✅ JSON válido; 3.87 s (con `max_tokens=1500`) |
+| Revisor | `meta/muse-glimmer-30b` | ✅ JSON válido; 35.6–36.2 s; 291–302 tokens de salida |
+| Revisor descartado | `mistralai/mistral-large-4-1t-a52b` | ⚠️ JSON válido, pero 89.9–175.3 s: excede `LLM_TIMEOUT_S=60` |
+| Revisor alternativo | `nvidia/nemotron-3.5-lightning-30b-a3b` | ❌ JSON inválido con el prompt real (2 intentos) |
 
 **Hallazgo crítico:** DeepSeek-V4.1-Flash ya no está disponible en la API de
 NVIDIA (410 Gone). Se cambió `LLM_MODEL` a MiniMax-M3.1-Flash y se actualizaron
 `.env.example`, la memoria (§6.1/§6.2/§9/§11) y la tabla de decisiones. El revisor
-del §8.7 quedó definido como Mistral-Large-4-1T-A52B, distinto del Nivel 2. El
-detalle y el comando reproducible están en `docs/reportes/verificacion_api.md` y
-`scripts/verificar_api.py`.
+del §8.7 quedó definido como Muse-Glimmer-30B, distinto del Nivel 2, tras
+descartar Mistral por latencia. El detalle y el comando reproducible están en
+`docs/reportes/verificacion_api.md` y `scripts/verificar_api.py`.
 
 ## Limitaciones de la verificación
 
@@ -179,5 +180,5 @@ documentada. O9 se cierra con el commit de los artefactos.
 
 **Para la Fase 5:** DeepSeek-V4.1-Flash devuelve 410 y no está en el catálogo;
 MiniMax-M3.1-Flash es el Nivel 2 principal y Nemotron funciona para el corpus.
-El revisor del §8.7 es Mistral-Large-4-1T-A52B; la verificación está en
+El revisor del §8.7 es Muse-Glimmer-30B; la verificación está en
 `docs/reportes/verificacion_api.md`.

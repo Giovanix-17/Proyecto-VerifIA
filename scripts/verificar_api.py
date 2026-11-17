@@ -31,6 +31,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from corpus_common import extraer_primer_json
 from corpus_generate import llamar_lote
 
+from verifia.classifier.retry import con_reintentos
+
 PROMPT_CLASIFICACION = """Clasifica este mensaje en una de estas cinco clases:
 legitimo, suplantacion_bancaria, paqueteria_retenida,
 oferta_laboral_fraudulenta, extorsion.
@@ -47,7 +49,7 @@ def _cliente() -> OpenAI:
     return OpenAI(
         api_key=api_key,
         base_url=os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"),
-        timeout=90.0,
+        timeout=float(os.getenv("LLM_TIMEOUT_S", "60")),
         max_retries=0,
     )
 
@@ -61,7 +63,7 @@ def _probar_corpus(cliente: OpenAI, modelo: str) -> bool:
             "suplantacion_bancaria",
             1,
             123456,
-            2000,
+            2600,
             "low",
         )
         latencia = round(time.perf_counter() - inicio, 2)
@@ -83,15 +85,18 @@ def _probar_corpus(cliente: OpenAI, modelo: str) -> bool:
 def _probar_clasificacion(cliente: OpenAI, rol: str, modelo: str) -> bool:
     inicio = time.perf_counter()
     try:
-        respuesta = cliente.chat.completions.create(
-            model=modelo,
-            messages=[
-                {"role": "system", "content": "Eres un clasificador de fraude."},
-                {"role": "user", "content": PROMPT_CLASIFICACION},
-            ],
-            temperature=0,
-            max_tokens=500,
-            extra_body={"reasoning_effort": "low"},
+        respuesta = con_reintentos(
+            lambda: cliente.chat.completions.create(
+                model=modelo,
+                messages=[
+                    {"role": "system", "content": "Eres un clasificador de fraude."},
+                    {"role": "user", "content": PROMPT_CLASIFICACION},
+                ],
+                temperature=0,
+                max_tokens=int(os.getenv("LLM_MAX_TOKENS", "1300")),
+                extra_body={"reasoning_effort": "low"},
+            ),
+            descripcion=f"clasificación ({rol})",
         )
         latencia = round(time.perf_counter() - inicio, 2)
         contenido = respuesta.choices[0].message.content or ""
