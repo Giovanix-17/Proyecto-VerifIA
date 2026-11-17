@@ -154,9 +154,9 @@ La clave va en `.env` como `NVIDIA_API_KEY`. **Solo se usa la API de NVIDIA**; n
 
 | Rol | Modelo | Motivo de la elección |
 |---|---|---|
-| **Nivel 2 (cascada)** — default | `minimaxai/minimax-m3.1-flash` | 428B / 23B activos, *Structured Output* explícito; **único candidato operativo** tras el HTTP 410 de DeepSeek (verificado el 17/11/2026). Licencia "research and development only" en NVIDIA, a citar en el reporte |
+| **Nivel 2 (cascada)** — principal | `minimaxai/minimax-m3.1-flash` | 428B / 23B activos, *Structured Output* explícito; **único candidato operativo** tras el HTTP 410 de DeepSeek (verificado el 17/11/2026). Licencia "research and development only" en NVIDIA, a citar en el reporte |
 | **Nivel 2 — alternativa** | `deepseek-ai/deepseek-v4.1-flash` (**no disponible**: HTTP 410 desde el 16/11/2026) | Base MIT, 552B / 8B activos, KV cache en FP4 (890 bytes/token) → menor latencia y costo; se conserva como referencia histórica y se reevaluará si NVIDIA lo repone |
-| **Revisor automático** (kappa, §8.7) | `mistralai/mistral-large-4-1t-a52b` (recomendado) o `nvidia/nemotron-3.5-lightning-30b-a3b` | Evita circularidad: ambos son distintos del Nivel 2. El autor elige; la propuesta y el sondeo están en `docs/reportes/verificacion_api.md` |
+| **Revisor automático** (kappa, §8.7) | `mistralai/mistral-large-4-1t-a52b` | Modelo distinto del Nivel 2 para evitar circularidad. Perfil MoE grande (~1T / 52B activos), instrucciones generales y salida JSON válida; verificado el 17/11/2026 |
 | **Generación del corpus** (Fase 2) | `nvidia/nemotron-3.5-bolt-e4b` | 8B (4B efectivos), Apache 2.0, español entre los idiomas focales de su post-training, *Structured Output*; barato y rápido para generar cientos de mensajes |
 
 El modelo se elige con variables de entorno, sin tocar código:
@@ -164,7 +164,7 @@ El modelo se elige con variables de entorno, sin tocar código:
 ```
 NVIDIA_API_KEY=...
 LLM_MODEL=minimaxai/minimax-m3.1-flash        # Nivel 2 (DeepSeek devuelve 410)
-LLM_REVIEWER_MODEL=mistralai/mistral-large-4-1t-a52b   # revisor propuesto; el autor elige
+LLM_REVIEWER_MODEL=mistralai/mistral-large-4-1t-a52b   # revisor automático (kappa)
 LLM_CORPUS_MODEL=nvidia/nemotron-3.5-bolt-e4b     # generación de corpus sintético
 LLM_TIMEOUT_S=60
 LLM_MAX_TOKENS=1200
@@ -339,7 +339,7 @@ No se cuenta con un segundo anotador humano. Para no dejar vacía la verificaci�
 
 1. **Muestreo** aleatorio estratificado por clase (20 %).
 2. **Insumo:** el texto **ya sanitizado** (nunca el original con PII) + la guía de anotación + la lista cerrada de 5 clases. `temperature=0`, salida JSON con un solo campo `tipologia`.
-3. **Modelo del revisor:** el que **no** esté en uso como Nivel 2 (§6.1), para evitar circularidad. Con MiniMax como Nivel 2, los candidatos son `mistralai/mistral-large-4-1t-a52b` (recomendado) y `nvidia/nemotron-3.5-lightning-30b-a3b`; el autor elige y la justificación queda en `docs/reportes/verificacion_api.md`.
+3. **Modelo del revisor:** `mistralai/mistral-large-4-1t-a52b` (§6.1), distinto del Nivel 2 para evitar circularidad. La justificación y el sondeo están en `docs/reportes/verificacion_api.md`.
 4. **Cálculo:** `cohen_kappa_score` (scikit-learn), matriz de confusión humano↔LLM y porcentaje de coincidencia.
 5. **Adjudicación manual:** en los desacuerdos, el autor decide la etiqueta correcta y registra el motivo. Estos casos son la **cola de revisión manual** que ya exige la regla 9 para los datos sintéticos: el trabajo no se duplica.
 6. **Reporte:** `docs/reportes/kappa_revisor_automatico.md` con el valor de kappa, la tabla de coincidencias, los casos adjudicados y el análisis de errores.
@@ -645,7 +645,7 @@ En cada fase, usa la skill principal y las de apoyo que lista la **§17**.
 | 12 | Orígenes de los datos | `publico`, `sintetico_llm`, `manual`, `plantilla_legitima`. La regla 9 aplica **solo a `sintetico_llm`** (exclusivo de train) |
 | 13 | Presidio | **Requisito de la Fase 3** (base obligatoria), con reconocedores personalizados para formatos mexicanos y NER `es_core_news_md` |
 | 14 | Modelo de Nivel 2 | `minimaxai/minimax-m3.1-flash` (default operativo); `deepseek-ai/deepseek-v4.1-flash` no disponible por HTTP 410 (17/11/2026) |
-| 15 | Modelo del revisor (kappa) | `mistralai/mistral-large-4-1t-a52b` (recomendado) o `nvidia/nemotron-3.5-lightning-30b-a3b`; el autor elige y siempre debe ser distinto del Nivel 2 |
+| 15 | Modelo del revisor (kappa) | `mistralai/mistral-large-4-1t-a52b`, distinto del Nivel 2 (evita circularidad) |
 | 16 | Modelo de generación de corpus | `nvidia/nemotron-3.5-bolt-e4b` (pequeño, barato, español en su post-training, *Structured Output*) |
 | 17 | Entrada al LLM | **Solo texto sanitizado**; la imagen nunca se envía al modelo |
 | 18 | Caché de respuestas | No se implementa (regla 2) |
@@ -653,8 +653,7 @@ En cada fase, usa la skill principal y las de apoyo que lista la **§17**.
 ### Pendiente
 
 - Unificar la cita de la ley de datos personales en el reporte final (el Capítulo I cita la de 2010 y el apartado 2.10 aclara que fue abrogada por la de 2025).
-- Confirmar en la Fase 5 el muestreo del Nivel 2 (`temperature=0` vs. `1.0`). El modelo ya está definido: MiniMax-M3.1-Flash, porque DeepSeek-V4.1-Flash devuelve 410.
-- Elegir el modelo revisor del §8.7 entre `mistralai/mistral-large-4-1t-a52b` (recomendado) y `nvidia/nemotron-3.5-lightning-30b-a3b` (ver `docs/reportes/verificacion_api.md`).
+- Confirmar en la Fase 5 el muestreo del Nivel 2 (`temperature=0` vs. `1.0`). El modelo ya está definido: MiniMax-M3.1-Flash, porque DeepSeek-V4.1-Flash devuelve 410. El revisor del §8.7 también está definido: Mistral-Large-4-1T-A52B.
 - Capturar los precios por millón de tokens vigentes en la consola de NVIDIA al momento del reporte, para la métrica de costo por análisis.
 
 ---

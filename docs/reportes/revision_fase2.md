@@ -146,15 +146,15 @@ reproducción y a la entrega. Es decisión del autor cuándo hacer el commit.
 | Corpus | `nvidia/nemotron-3.5-bolt-e4b` | ✅ Genera un mensaje válido; latencia ~14 s; con `max_tokens=2000` |
 | Nivel 2 | `minimaxai/minimax-m3.1-flash` | ✅ Devuelve JSON válido; latencia < 6 s |
 | Nivel 2 anterior | `deepseek-ai/deepseek-v4.1-flash` | ❌ **HTTP 410**; no aparece en `/v1/models` |
-| Revisor propuesto | `mistralai/mistral-large-4-1t-a52b` | ✅ JSON válido; 8.24 s |
-| Revisor alternativo | `nvidia/nemotron-3.5-lightning-30b-a3b` | ✅ JSON válido; 3.87 s (con `max_tokens≥1500`) |
+| Revisor | `mistralai/mistral-large-4-1t-a52b` | ✅ JSON válido; 8.24 s |
+| Revisor alternativo | `nvidia/nemotron-3.5-lightning-30b-a3b` | ✅ JSON válido; 3.87 s (con `max_tokens=1500`) |
 
 **Hallazgo crítico:** DeepSeek-V4.1-Flash ya no está disponible en la API de
 NVIDIA (410 Gone). Se cambió `LLM_MODEL` a MiniMax-M3.1-Flash y se actualizaron
 `.env.example`, la memoria (§6.1/§6.2/§9/§11) y la tabla de decisiones. El revisor
-del §8.7 debe ser otro modelo; se propone Mistral-Large-4 (recomendado) o
-Nemotron-3.5-Lightning. El detalle y el comando reproducible están en
-`docs/reportes/verificacion_api.md` y `scripts/verificar_api.py`.
+del §8.7 quedó definido como Mistral-Large-4-1T-A52B, distinto del Nivel 2. El
+detalle y el comando reproducible están en `docs/reportes/verificacion_api.md` y
+`scripts/verificar_api.py`.
 
 ## Limitaciones de la verificación
 
@@ -178,6 +178,6 @@ split) y O8 (estado del plan); O4 quedó resuelto con la política de dominios y
 documentada. O9 se cierra con el commit de los artefactos.
 
 **Para la Fase 5:** DeepSeek-V4.1-Flash devuelve 410 y no está en el catálogo;
-MiniMax-M3.1-Flash es el Nivel 2 operativo y Nemotron funciona para el corpus.
-Hay que elegir un revisor distinto de MiniMax; la propuesta está en
+MiniMax-M3.1-Flash es el Nivel 2 principal y Nemotron funciona para el corpus.
+El revisor del §8.7 es Mistral-Large-4-1T-A52B; la verificación está en
 `docs/reportes/verificacion_api.md`.
