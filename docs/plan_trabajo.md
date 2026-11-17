@@ -13,7 +13,7 @@ Documento de planeación de la Fase 1 (Actividad 1). Fuente de verdad:
 | Institución | Universidad Tecnológica de Tabasco — DATIC |
 | Periodo referencial | 29/09/2026 – 28/12/2026 |
 | Versión de este plan | 1.2 (16/11/2026) |
-| Estado | Aprobado para iniciar la Fase 2 (16/11/2026) |
+| Estado | Aprobado; Fase 1 y Fase 2 completadas (16/11/2026) |
 
 ---
 
@@ -110,7 +110,7 @@ flowchart TD
 | ML clásico | scikit-learn | `>=1.4,<2` |
 | Sanitización | Presidio + spaCy `es_core_news_md` | `>=2.2` / `3.8.x` |
 | OCR | Tesseract 5 (`spa`) + OpenCV headless | `>=4.9` |
-| LLM | API de NVIDIA (compatible OpenAI) | `deepseek-v4.1-flash`, `minimax-m3.1-flash`, `nemotron-3.5-bolt-e4b` |
+| LLM | API de NVIDIA (compatible OpenAI) | `minimax-m3.1-flash` (Nivel 2), `mistral-large-4-1t-a52b` (revisor propuesto), `nemotron-3.5-bolt-e4b` (corpus) |
 | Frontend | HTML + CSS + JS estático | sin framework ni build |
 | Pruebas | pytest (+ Playwright para E2E) | `>=8` |
 | Contenedor | Docker Desktop 4.99 (WSL2) + Docker Compose 5.7 | instalado y verificado el 16/11/2026 |

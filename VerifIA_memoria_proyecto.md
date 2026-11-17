@@ -154,17 +154,17 @@ La clave va en `.env` como `NVIDIA_API_KEY`. **Solo se usa la API de NVIDIA**; n
 
 | Rol | Modelo | Motivo de la elección |
 |---|---|---|
-| **Nivel 2 (cascada)** — default | `deepseek-ai/deepseek-v4.1-flash` | Base MIT (uso libre), 552B totales / 8B activos, KV cache en FP4 (890 bytes/token) → menor latencia y costo por análisis |
-| **Nivel 2 — alternativa** | `minimaxai/minimax-m3.1-flash` | 428B / 23B activos, declara soporte explícito de *Structured Output*; licencia "research and development only" en NVIDIA, a citar en el reporte |
-| **Revisor automático** (kappa, §8.7) | el modelo que **no** esté en uso como Nivel 2 | Evita circularidad: el revisor y el clasificador son modelos distintos |
+| **Nivel 2 (cascada)** — default | `minimaxai/minimax-m3.1-flash` | 428B / 23B activos, *Structured Output* explícito; **único candidato operativo** tras el HTTP 410 de DeepSeek (verificado el 17/11/2026). Licencia "research and development only" en NVIDIA, a citar en el reporte |
+| **Nivel 2 — alternativa** | `deepseek-ai/deepseek-v4.1-flash` (**no disponible**: HTTP 410 desde el 16/11/2026) | Base MIT, 552B / 8B activos, KV cache en FP4 (890 bytes/token) → menor latencia y costo; se conserva como referencia histórica y se reevaluará si NVIDIA lo repone |
+| **Revisor automático** (kappa, §8.7) | `mistralai/mistral-large-4-1t-a52b` (recomendado) o `nvidia/nemotron-3.5-lightning-30b-a3b` | Evita circularidad: ambos son distintos del Nivel 2. El autor elige; la propuesta y el sondeo están en `docs/reportes/verificacion_api.md` |
 | **Generación del corpus** (Fase 2) | `nvidia/nemotron-3.5-bolt-e4b` | 8B (4B efectivos), Apache 2.0, español entre los idiomas focales de su post-training, *Structured Output*; barato y rápido para generar cientos de mensajes |
 
 El modelo se elige con variables de entorno, sin tocar código:
 
 ```
 NVIDIA_API_KEY=...
-LLM_MODEL=deepseek-ai/deepseek-v4.1-flash        # Nivel 2
-LLM_REVIEWER_MODEL=minimaxai/minimax-m3.1-flash   # revisor automático (kappa)
+LLM_MODEL=minimaxai/minimax-m3.1-flash        # Nivel 2 (DeepSeek devuelve 410)
+LLM_REVIEWER_MODEL=mistralai/mistral-large-4-1t-a52b   # revisor propuesto; el autor elige
 LLM_CORPUS_MODEL=nvidia/nemotron-3.5-bolt-e4b     # generación de corpus sintético
 LLM_TIMEOUT_S=60
 LLM_MAX_TOKENS=1200
@@ -195,7 +195,8 @@ LLM_REASONING_EFFORT=low
 | Publicación en NVIDIA | 18/09/2026 | 22/10/2026 | 23/10/2026 |
 
 Notas para el reporte:
-- Los benchmarks publicados por los proveedores **no están verificados de forma independiente por NVIDIA** y ninguno mide español ni fraude; por eso la selección final entre los dos modelos grandes es **empírica** (Fase 5).
+- **Disponibilidad (17/11/2026):** DeepSeek-V4.1-Flash devuelve HTTP 410 y no aparece en `/v1/models`; el Nivel 2 queda en MiniMax-M3.1-Flash. Los datos de DeepSeek se conservan como referencia de la comparación prevista y por si NVIDIA lo repone.
+- Los benchmarks publicados por los proveedores **no están verificados de forma independiente por NVIDIA** y ninguno mide español ni fraude; la comparación empírica entre ambos modelos grandes **no pudo ejecutarse** por el 410. MiniMax se evaluará como único Nivel 2 operativo en la Fase 5.
 - Nemotron-3.5-Bolt-E4B está pensado por NVIDIA para *customization y post-training*, no para inferencia en producción: encaja con su uso real en este proyecto (generar el corpus de entrenamiento).
 - En NVIDIA la API se rige por el *NVIDIA API Trial Terms of Service* (créditos de prueba y límites de uso). Esto obliga a usar el modelo pequeño para el trabajo masivo (§9 Fase 2) y a que el fallback al Nivel 1 sea real, no teórico (regla 8).
 
@@ -338,7 +339,7 @@ No se cuenta con un segundo anotador humano. Para no dejar vacía la verificaci�
 
 1. **Muestreo** aleatorio estratificado por clase (20 %).
 2. **Insumo:** el texto **ya sanitizado** (nunca el original con PII) + la guía de anotación + la lista cerrada de 5 clases. `temperature=0`, salida JSON con un solo campo `tipologia`.
-3. **Modelo del revisor:** el que **no** esté en uso como Nivel 2 (§6.1), para evitar circularidad.
+3. **Modelo del revisor:** el que **no** esté en uso como Nivel 2 (§6.1), para evitar circularidad. Con MiniMax como Nivel 2, los candidatos son `mistralai/mistral-large-4-1t-a52b` (recomendado) y `nvidia/nemotron-3.5-lightning-30b-a3b`; el autor elige y la justificación queda en `docs/reportes/verificacion_api.md`.
 4. **Cálculo:** `cohen_kappa_score` (scikit-learn), matriz de confusión humano↔LLM y porcentaje de coincidencia.
 5. **Adjudicación manual:** en los desacuerdos, el autor decide la etiqueta correcta y registra el motivo. Estos casos son la **cola de revisión manual** que ya exige la regla 9 para los datos sintéticos: el trabajo no se duplica.
 6. **Reporte:** `docs/reportes/kappa_revisor_automatico.md` con el valor de kappa, la tabla de coincidencias, los casos adjudicados y el análisis de errores.
@@ -405,7 +406,7 @@ Cada fase corresponde a una actividad de la propuesta y a un objetivo específic
 
 **Nivel 2 — LLM con salida estructurada**
 - Prompt con: rol, definiciones de cada tipología, tácticas de ingeniería social y casos resueltos (few-shot).
-- Modelo: `deepseek-ai/deepseek-v4.1-flash` (§6.1), con `reasoning_effort` bajo.
+- Modelo: `minimaxai/minimax-m3.1-flash` (§6.1), con `reasoning_effort` bajo. DeepSeek-V4.1-Flash queda descartado por HTTP 410.
 - Salida JSON validada con Pydantic (§8.4), extracción robusta del bloque JSON desde `content`.
 - Si el JSON es inválido o la API falla, usar el fallback del Nivel 1 (regla 8).
 
@@ -417,7 +418,7 @@ Cada fase corresponde a una actividad de la propuesta y a un objetivo específic
 - Cálculo de la puntuación y regla de `max()` según §8.6.
 
 **Comparación de modelos LLM (parte de la Fase 5)**
-- Probar `deepseek-ai/deepseek-v4.1-flash` y `minimaxai/minimax-m3.1-flash` sobre el conjunto de validación con el mismo prompt.
+- Probar `minimaxai/minimax-m3.1-flash` como Nivel 2 sobre el conjunto de validación. La comparación prevista con DeepSeek-V4.1-Flash **no pudo ejecutarse** (HTTP 410); si NVIDIA lo repone, repetirla con el mismo prompt. Como contraste opcional puede usarse `mistralai/mistral-large-4-1t-a52b`.
 - Criterio objetivo de elección: **% de JSON válido**, **acuerdo con las etiquetas humanas**, **latencia** y **costo por análisis** (tokens de entrada/salida reportados por la API).
 - Probar `temperature=0` contra el muestreo recomendado por el modelo (`1.0`/`top_p=0.95`) y quedarse con el mejor.
 - Se deja documentado el modelo elegido y la comparación completa.
@@ -542,7 +543,7 @@ Responsable de todas las tareas: Giovani Hernández. ◆ = hito.
 - **OCR:** Tesseract (Smith, 2007), soporta español; las capturas de mensajería requieren preprocesamiento (fondos de color, globos, emojis, modo oscuro).
 - **Explicabilidad:** las advertencias genéricas son poco eficaces; las específicas (característica sospechosa, peligro, consecuencias) mejoran comprensión y confianza (Desolda et al., 2024). El color no debe ser el único canal (WCAG 2.1).
 - **Privacidad en la inferencia:** enviar la captura directamente al LLM multimodal ahorraría el OCR, pero expondría los datos personales que la sanitización elimina. Se elige el flujo local OCR → sanitización → LLM(texto), y se documenta como decisión de diseño.
-- **Modelos de la API de NVIDIA:** los benchmarks publicados son de los propios proveedores y no están verificados de forma independiente; ninguno mide español ni fraude. Por eso la elección entre DeepSeek-V4.1-Flash y MiniMax-M3.1-Flash es empírica (Fase 5) y no por reputación.
+- **Modelos de la API de NVIDIA:** los benchmarks publicados son de los propios proveedores y no están verificados de forma independiente; ninguno mide español ni fraude. La comparación empírica prevista entre DeepSeek-V4.1-Flash y MiniMax-M3.1-Flash **no pudo ejecutarse** porque DeepSeek devuelve HTTP 410 (17/11/2026); MiniMax es el Nivel 2 operativo y se evaluará en la Fase 5.
 - **Marco normativo:** la Ley Federal de Protección de Datos Personales en Posesión de los Particulares fue **abrogada por una nueva ley publicada el 20/03/2025** (vigente desde el día siguiente); supervisión pasa a la Secretaría Anticorrupción y Buen Gobierno. Principios que guían el diseño: tratar datos solo para finalidades informadas y lo estrictamente necesario → sanitizar antes de procesar, no conservar, informar al usuario.
 
 ### Proyectos relacionados
@@ -643,8 +644,8 @@ En cada fase, usa la skill principal y las de apoyo que lista la **§17**.
 | 11 | Tamaño del corpus | **500 mensajes** (100 por clase); mínimo aceptable 400 |
 | 12 | Orígenes de los datos | `publico`, `sintetico_llm`, `manual`, `plantilla_legitima`. La regla 9 aplica **solo a `sintetico_llm`** (exclusivo de train) |
 | 13 | Presidio | **Requisito de la Fase 3** (base obligatoria), con reconocedores personalizados para formatos mexicanos y NER `es_core_news_md` |
-| 14 | Modelo de Nivel 2 | `deepseek-ai/deepseek-v4.1-flash` (default); alternativa `minimaxai/minimax-m3.1-flash`; comparación empírica en Fase 5 |
-| 15 | Modelo del revisor (kappa) | El que **no** esté en uso como Nivel 2 (evita circularidad) |
+| 14 | Modelo de Nivel 2 | `minimaxai/minimax-m3.1-flash` (default operativo); `deepseek-ai/deepseek-v4.1-flash` no disponible por HTTP 410 (17/11/2026) |
+| 15 | Modelo del revisor (kappa) | `mistralai/mistral-large-4-1t-a52b` (recomendado) o `nvidia/nemotron-3.5-lightning-30b-a3b`; el autor elige y siempre debe ser distinto del Nivel 2 |
 | 16 | Modelo de generación de corpus | `nvidia/nemotron-3.5-bolt-e4b` (pequeño, barato, español en su post-training, *Structured Output*) |
 | 17 | Entrada al LLM | **Solo texto sanitizado**; la imagen nunca se envía al modelo |
 | 18 | Caché de respuestas | No se implementa (regla 2) |
@@ -652,7 +653,8 @@ En cada fase, usa la skill principal y las de apoyo que lista la **§17**.
 ### Pendiente
 
 - Unificar la cita de la ley de datos personales en el reporte final (el Capítulo I cita la de 2010 y el apartado 2.10 aclara que fue abrogada por la de 2025).
-- Confirmar en la Fase 5 el modelo de Nivel 2 definitivo entre los dos candidatos y el muestreo (`temperature=0` vs. `1.0`).
+- Confirmar en la Fase 5 el muestreo del Nivel 2 (`temperature=0` vs. `1.0`). El modelo ya está definido: MiniMax-M3.1-Flash, porque DeepSeek-V4.1-Flash devuelve 410.
+- Elegir el modelo revisor del §8.7 entre `mistralai/mistral-large-4-1t-a52b` (recomendado) y `nvidia/nemotron-3.5-lightning-30b-a3b` (ver `docs/reportes/verificacion_api.md`).
 - Capturar los precios por millón de tokens vigentes en la consola de NVIDIA al momento del reporte, para la métrica de costo por análisis.
 
 ---

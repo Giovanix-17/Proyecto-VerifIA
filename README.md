@@ -32,14 +32,45 @@ Invoke-RestMethod http://localhost:8000/health
 Detalle completo en [`docs/instalacion.md`](docs/instalacion.md).
 
 Documentación del proyecto: [plan de trabajo](docs/plan_trabajo.md) ·
-[instalación](docs/instalacion.md) · [skills por fase](docs/skills_por_fase.md).
+[instalación](docs/instalacion.md) · [guía de anotación](docs/guia_anotacion.md) ·
+[skills por fase](docs/skills_por_fase.md) · [revisión Fase 2](docs/reportes/revision_fase2.md) ·
+[verificación de API](docs/reportes/verificacion_api.md).
+
+## Corpus (Fase 2)
+
+500 mensajes en español mexicano, 100 por clase, con partición 70/15/15. Los
+sintéticos (`nvidia/nemotron-3.5-bolt-e4b`) van **solo a train**; validación y
+prueba usan ejemplos manuales y plantillas legítimas.
+
+```powershell
+# 1. Generar sintéticos (reanudable; ~48 llamadas para 60 por clase)
+docker run --rm -v "${PWD}:/app" -w /app --env-file .env verifia:0.1.0 `
+  python scripts/corpus_generate.py --per-class 60
+
+# 2. Depurar, auditar PII y particionar
+docker run --rm -v "${PWD}:/app" -w /app verifia:0.1.0 `
+  python scripts/corpus_build.py
+
+# 3. Revisar etiquetas (paso humano obligatorio)
+docker run --rm -v "${PWD}:/app" -w /app verifia:0.1.0 `
+  python scripts/corpus_review.py --export
+# editar data/annotated/revision.csv y luego:
+docker run --rm -v "${PWD}:/app" -w /app verifia:0.1.0 `
+  python scripts/corpus_review.py --import
+docker run --rm -v "${PWD}:/app" -w /app verifia:0.1.0 `
+  python scripts/corpus_build.py
+```
+
+Artefactos: `data/annotated/corpus.jsonl`, `data/splits/{train,val,test}.jsonl`,
+`data/splits/split_manifest.json` y
+[reporte de cobertura](docs/reportes/cobertura_corpus.md).
 
 ## Estado del proyecto
 
 | Fase | Estado |
 |---|---|
 | 1 — Planeación, repositorio y contenedor | Completada y aprobada (16/11/2026) |
-| 2 — Corpus etiquetado | Pendiente |
+| 2 — Corpus etiquetado | Completada: 500 mensajes, 500 etiquetas confirmadas por el autor, 22 pruebas (17/11/2026) |
 | 3 — Sanitización | Pendiente |
 | 4 — OCR | Pendiente |
 | 5 — Clasificador en cascada | Pendiente |
