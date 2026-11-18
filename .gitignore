@@ -18,10 +18,8 @@ __pycache__/
 # Crudo y sintético: pueden contener datos personales o requerir revisión manual.
 data/raw/*
 data/synthetic/*
-# Capturas de OCR: se regeneran con el script; solo se versionan las transcripciones.
-data/ocr_test/*.png
-data/ocr_test/*.jpg
-data/ocr_test/*.jpeg
+# Las capturas de OCR son sintéticas y se versionan para reproducir el CER.
+# No agregues capturas reales con datos personales.
 !data/**/.gitkeep
 
 # --- Artefactos temporales ---

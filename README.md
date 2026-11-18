@@ -35,6 +35,7 @@ Documentación del proyecto: [plan de trabajo](docs/plan_trabajo.md) ·
 [instalación](docs/instalacion.md) · [guía de anotación](docs/guia_anotacion.md) ·
 [skills por fase](docs/skills_por_fase.md) · [revisión Fase 2](docs/reportes/revision_fase2.md) ·
 [cobertura de sanitización](docs/reportes/cobertura_sanitizacion.md) ·
+[OCR: CER/WER](docs/reportes/ocr_cer_wer.md) ·
 [verificación de API](docs/reportes/verificacion_api.md).
 
 ## Corpus (Fase 2)
@@ -92,6 +93,36 @@ duros al escanear los 500 mensajes del corpus con un detector independiente.
 El detalle metodológico y los casos residuales están en el
 [reporte](docs/reportes/cobertura_sanitizacion.md).
 
+## OCR (Fase 4)
+
+Las capturas PNG o JPEG se procesan **en local** con OpenCV y Tesseract en
+español; la imagen nunca se envía a la API. Se aplican límites de 5 MB,
+4000 px de lado mayor y 12 MP, se corrige la orientación EXIF, se amplían las
+capturas pequeñas, se invierte el modo oscuro y se normaliza el fondo antes de
+binarizar. El resultado es un **borrador editable** que el usuario revisa antes
+del análisis.
+
+```python
+from verifia.ocr import extraer_texto, extraer_y_sanitizar
+
+borrador = extraer_texto("captura.png")
+borrador.texto        # texto reconocido, listo para corregir en la interfaz
+
+borrador, limpio = extraer_y_sanitizar("captura.png")
+limpio.texto          # ya con [TELEFONO], [CORREO], etc.
+```
+
+```powershell
+# Generar 60 capturas sintéticas y medir CER/WER
+python scripts/generar_capturas_ocr.py
+python scripts/eval_ocr.py --report docs/reportes/ocr_cer_wer.md
+```
+
+Resultado: 60 capturas (claro/oscuro, cuatro resoluciones, WhatsApp y SMS),
+CER 0.14 % y WER 0.80 %, sin fallas del pipeline. Las capturas son sintéticas,
+así que las cifras son una línea base reproducible y no una garantía en campo;
+el detalle está en el [reporte](docs/reportes/ocr_cer_wer.md).
+
 ## Estado del proyecto
 
 | Fase | Estado |
@@ -99,7 +130,7 @@ El detalle metodológico y los casos residuales están en el
 | 1 — Planeación, repositorio y contenedor | Completada y aprobada (16/11/2026) |
 | 2 — Corpus etiquetado | Completada: 500 mensajes, 500 etiquetas confirmadas por el autor, 22 pruebas (17/11/2026) |
 | 3 — Sanitización | Completada: Presidio + spaCy `es_core_news_md`, 9 marcadores, 120 mensajes anotados, cero PII superviviente (17/11/2026) |
-| 4 — OCR | Pendiente |
+| 4 — OCR | Completada: pipeline PNG/JPEG con Tesseract `spa`, límites, preprocesamiento y 60 capturas sintéticas con CER 0.14 % (17/11/2026) |
 | 5 — Clasificador en cascada | Pendiente |
 | 6 — Explicabilidad | Pendiente |
 | 7 — Interfaz web | Pendiente |
