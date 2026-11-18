@@ -1,7 +1,7 @@
 # Cobertura del corpus — VerifIA (Fase 2)
 
 Generado automáticamente por `scripts/corpus_build.py`.
-Fecha: 2026-11-17T15:52:57+00:00 · Semilla: `42`.
+Fecha: 2026-11-17T17:35:24+00:00 · Semilla: `42`.
 
 ## Totales
 

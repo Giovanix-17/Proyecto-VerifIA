@@ -1,6 +1,6 @@
 # Revisión de la Fase 2 — VerifIA
 
-**Fecha:** 16/11/2026
+**Fecha:** 16/11/2026 (actualizado 17/11/2026)
 **Alcance:** verificar el corpus, la partición, la documentación y los scripts de la
 Fase 2 contra `VerifIA_memoria_proyecto.md` (§8.2, §8.3 y §9) y la skill
 `verifia-corpus`.
@@ -21,6 +21,25 @@ Se identifican **observaciones no bloqueantes** (trazabilidad de la generación,
 dominios no reservados, un caso de etiqueta débil y detalles documentales). Ninguna
 invalida el corpus ni impide avanzar a la Fase 3.
 
+## Decisión de cierre sobre el origen `publico` (17/11/2026)
+
+**Se acepta la ausencia de mensajes con `origen: publico` y el corpus queda
+congelado para las fases siguientes.**
+
+- Las fuentes revisadas describen las modalidades, pero no publican el texto
+  completo de los mensajes. Reconstruirlos o parafrasearlos habría etiquetado
+  como `publico` un texto que no lo es, y la regla 9 exige que el origen sea
+  trazable.
+- La skill `verifia-corpus` no exige ese origen para aceptar la fase; el corpus
+  cumple 500 mensajes, 100 por clase, con tres orígenes verificables (`manual`,
+  `plantilla_legitima`, `sintetico_llm`).
+- La ausencia se declara como **limitación de representatividad** en el reporte
+  final. No se compensa inventando mensajes ni traduciendo colecciones externas.
+- Para no romper la reserva del conjunto de prueba, **cualquier incorporación
+  posterior de mensajes `publico` obliga a crear una nueva versión del corpus y
+  una nueva partición**. No se añadirán mensajes a la versión actual ni se
+  mezclarán con el test ya reservado.
+
 ## Checklist de aceptación
 
 | Requisito | Estado | Evidencia |
@@ -28,7 +47,7 @@ invalida el corpus ni impide avanzar a la Fase 3.
 | 500 mensajes (mínimo 400) | ✅ | 500 en `corpus.jsonl` |
 | 100 por clase, 5 clases | ✅ | 100 en cada una de las 5 clases |
 | Etiqueta definitiva del autor | ✅ | 500 con `revision_autor = confirmado`; 0 pendientes |
-| Orígenes del catálogo | ✅ | `manual: 175`, `plantilla_legitima: 85`, `sintetico_llm: 240` |
+| Orígenes usados | ✅ | `manual: 175`, `plantilla_legitima: 85`, `sintetico_llm: 240`; `publico: 0` (ver decisión de cierre) |
 | Sintéticos solo en `train` | ✅ | 240 en train; 0 en val y test |
 | Partición 70/15/15 estratificada | ✅ | 350 / 75 / 75; 70 / 15 / 15 por clase |
 | Sin duplicados exactos | ✅ | 500 textos únicos |
@@ -38,7 +57,7 @@ invalida el corpus ni impide avanzar a la Fase 3.
 | Partición reproducible | ✅ | `particionar(seed=42)` reproduce exactamente los ids de los tres splits; hashes del manifiesto verificados |
 | Guía de anotación completa | ✅ | Definiciones, señales, fronteras, 5 ejemplos por clase y casos ambiguos |
 | Reporte de cobertura | ✅ | Conteos por clase, split, origen y depuración |
-| Pruebas automatizadas | ✅ | **22 pruebas pasan**; `ruff check` sin errores |
+| Pruebas automatizadas | ✅ | **29 pruebas pasan**; `ruff check` sin errores |
 
 ### Composición verificada
 
@@ -133,11 +152,25 @@ los hashes.
 
 La línea 16 ya indica “Aprobado; Fase 1 y Fase 2 completadas (16/11/2026)”.
 
-### O9. Artefactos sin versionar (menor, pendiente)
+### O9. Artefactos sin versionar (menor, resuelto)
 
-El repositorio ya es git, pero `data/annotated/`, `data/splits/`, `scripts/` y
-`tests/` de la Fase 2 siguen sin commit. No afecta la validez del corpus; sí a la
-reproducción y a la entrega. Es decisión del autor cuándo hacer el commit.
+El repositorio ya es git y los artefactos de la Fase 2 quedaron versionados en el
+commit de cierre. La corrección O10 se confirma en el commit de cierre de esta
+revisión; los archivos afectados son `corpus.jsonl`, `train.jsonl`,
+`split_manifest.json`, `revision.csv`, `cobertura_corpus.md` y este reporte. La
+fuente sintética (`data/synthetic/generated.jsonl`) está ignorada por git, pero
+el corpus versionado ya contiene el texto corregido.
+
+### O10. Teléfonos sintéticos verosímiles (corregido)
+
+La comprobación preliminar de PII no marcó `syn-0036` (`55 1234 5678`) ni
+`syn-0037` (`55 9876 5432`) porque el heurístico de contexto solo reconocía
+`llama`/`teléfono`, no `llame`/`Contacte`. Ambos eran sintéticos y solo de
+`train`, pero se sustituyeron por `55 0000 0000` en
+`data/synthetic/generated.jsonl`. Se regeneraron `corpus.jsonl`, `train.jsonl`,
+el manifiesto, el reporte de cobertura y `revision.csv`; **`val.jsonl` y
+`test.jsonl` conservan exactamente el mismo hash**, así que la reserva del test
+no se alteró. El corpus mantiene 500 mensajes y 100 por clase.
 
 ## Verificación de la API (16–17/11/2026)
 
@@ -175,8 +208,11 @@ descartar Mistral por latencia. El detalle y el comando reproducible están en
 **Fase 2 aprobada.** El corpus es utilizable para entrenar y evaluar la cascada.
 Se aplicaron las correcciones O2 (bitácora por lote), O3 (acuerdo 240/240), O5
 (guía 1–4), O6 (sustitución de `syn-0147` por `syn-0216`), O7 (manifiesto por
-split) y O8 (estado del plan); O4 quedó resuelto con la política de dominios ya
-documentada. O9 se cierra con el commit de los artefactos.
+split), O8 (estado del plan) y O10 (teléfonos sintéticos sustituidos por
+`55 0000 0000`); O4 quedó resuelto con la política de dominios ya documentada.
+O9 se cierra con el commit de los artefactos. La suite completa (**29 pruebas**)
+pasa en el entorno virtual local, y `val.jsonl`/`test.jsonl` conservan el hash
+anterior a la corrección de O10.
 
 **Para la Fase 5:** DeepSeek-V4.1-Flash devuelve 410 y no está en el catálogo;
 MiniMax-M3.1-Flash es el Nivel 2 principal y Nemotron funciona para el corpus.
