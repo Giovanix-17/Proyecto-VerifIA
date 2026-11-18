@@ -54,7 +54,7 @@ corrige la skill, no la memoria.
 
 - [x] **Fase 1** — `markdown-mermaid-writing` → plan, instalación, contenedor. Plan aprobado y contenedor `healthy` (16/11/2026).
 - [x] **Fase 2** — `verifia-corpus` + `huggingface-datasets` / `exploratory-data-analysis` / `citation-management` → corpus de 500 construido, etiquetas confirmadas por el autor y pruebas en verde (16/11/2026).
-- [ ] **Fase 3** — `verifia-sanitizacion` → módulo de enmascarado y pruebas.
+- [x] **Fase 3** — `verifia-sanitizacion` → Presidio + `es_core_news_md`, 9 marcadores, reconocedores Luhn/CLABE/CURP/RFC y regla de `[CODIGO]`; 120 mensajes anotados (141 entidades), cero supervivencias y cero hallazgos duros en los 500 mensajes del corpus (17/11/2026).
 - [ ] **Fase 4** — `verifia-ocr` + `webapp-testing` (capturas sintéticas) + `scientific-visualization` → CER/WER.
 - [ ] **Fase 5** — `scikit-learn` + `verifia-nivel2-llm` + `statistical-analysis` → cascada y métricas.
 - [ ] **Fase 6** — `verifia-explicabilidad` → semáforo y recomendaciones.

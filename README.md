@@ -34,6 +34,7 @@ Detalle completo en [`docs/instalacion.md`](docs/instalacion.md).
 Documentación del proyecto: [plan de trabajo](docs/plan_trabajo.md) ·
 [instalación](docs/instalacion.md) · [guía de anotación](docs/guia_anotacion.md) ·
 [skills por fase](docs/skills_por_fase.md) · [revisión Fase 2](docs/reportes/revision_fase2.md) ·
+[cobertura de sanitización](docs/reportes/cobertura_sanitizacion.md) ·
 [verificación de API](docs/reportes/verificacion_api.md).
 
 ## Corpus (Fase 2)
@@ -65,13 +66,39 @@ Artefactos: `data/annotated/corpus.jsonl`, `data/splits/{train,val,test}.jsonl`,
 `data/splits/split_manifest.json` y
 [reporte de cobertura](docs/reportes/cobertura_corpus.md).
 
+## Sanitización (Fase 3)
+
+Antes de cualquier clasificación, todo texto pasa por Presidio + spaCy
+`es_core_news_md`. Se sustituyen teléfonos, correos, nombres, CLABE, tarjetas,
+códigos, CURP, RFC y enlaces (solo dominio) por los nueve marcadores del
+catálogo. No se guarda el texto original ni una tabla reversible.
+
+```python
+from verifia.sanitizer import sanitizar
+
+resultado = sanitizar("Mi teléfono es 55 1234 5678 y mi correo es ana@ejemplo.com")
+resultado.texto       # "Mi teléfono es [TELEFONO] y mi correo es [CORREO]"
+resultado.marcadores  # {'[TELEFONO]': 1, '[CORREO]': 1}
+```
+
+```powershell
+# Repetir la medición de cobertura y precisión
+python scripts/eval_sanitizer.py --report docs/reportes/cobertura_sanitizacion.md
+```
+
+Resultado: 120 mensajes anotados (141 entidades), 100 % de cobertura y
+precisión en el conjunto de ajuste, cero PII superviviente, y cero hallazgos
+duros al escanear los 500 mensajes del corpus con un detector independiente.
+El detalle metodológico y los casos residuales están en el
+[reporte](docs/reportes/cobertura_sanitizacion.md).
+
 ## Estado del proyecto
 
 | Fase | Estado |
 |---|---|
 | 1 — Planeación, repositorio y contenedor | Completada y aprobada (16/11/2026) |
 | 2 — Corpus etiquetado | Completada: 500 mensajes, 500 etiquetas confirmadas por el autor, 22 pruebas (17/11/2026) |
-| 3 — Sanitización | Pendiente |
+| 3 — Sanitización | Completada: Presidio + spaCy `es_core_news_md`, 9 marcadores, 120 mensajes anotados, cero PII superviviente (17/11/2026) |
 | 4 — OCR | Pendiente |
 | 5 — Clasificador en cascada | Pendiente |
 | 6 — Explicabilidad | Pendiente |
