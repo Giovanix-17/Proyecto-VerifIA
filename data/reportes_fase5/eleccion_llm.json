@@ -1,0 +1,287 @@
+{
+  "fecha": "2026-11-18T10:55:39",
+  "modelo": "minimaxai/minimax-m3.1-flash",
+  "celdas": {
+    "temp0_determinista": {
+      "celda": "temp0_determinista",
+      "n": 75,
+      "pct_json_valido": 0.9867,
+      "acuerdo": 0.9189,
+      "latencia_p50_s": 109.16,
+      "latencia_p95_s": 132.3,
+      "tokens_entrada_media": 1714.2,
+      "tokens_salida_media": 150.3,
+      "senales_descartadas": 1,
+      "fallos": {
+        "senal_no_verificada": 1
+      },
+      "metricas_solo_nivel2": {
+        "accuracy": 0.9189,
+        "f1_macro": 0.9184,
+        "precision_macro": 0.9251,
+        "recall_macro": 0.919,
+        "por_clase": {
+          "legitimo": {
+            "precision": 0.7647,
+            "recall": 0.9286,
+            "f1": 0.8387,
+            "soporte": 14.0
+          },
+          "suplantacion_bancaria": {
+            "precision": 0.9375,
+            "recall": 1.0,
+            "f1": 0.9677,
+            "soporte": 15.0
+          },
+          "paqueteria_retenida": {
+            "precision": 0.9231,
+            "recall": 0.8,
+            "f1": 0.8571,
+            "soporte": 15.0
+          },
+          "oferta_laboral_fraudulenta": {
+            "precision": 1.0,
+            "recall": 0.8667,
+            "f1": 0.9286,
+            "soporte": 15.0
+          },
+          "extorsion": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "soporte": 15.0
+          }
+        },
+        "matriz_confusion": [
+          [
+            13,
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            15,
+            0,
+            0,
+            0
+          ],
+          [
+            2,
+            1,
+            12,
+            0,
+            0
+          ],
+          [
+            2,
+            0,
+            0,
+            13,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            15
+          ]
+        ],
+        "etiquetas": [
+          "legitimo",
+          "suplantacion_bancaria",
+          "paqueteria_retenida",
+          "oferta_laboral_fraudulenta",
+          "extorsion"
+        ]
+      }
+    },
+    "temp1_recomendado": {
+      "celda": "temp1_recomendado",
+      "n": 75,
+      "pct_json_valido": 0.9467,
+      "acuerdo": 0.9577,
+      "latencia_p50_s": 176.11,
+      "latencia_p95_s": 206.68,
+      "tokens_entrada_media": 1714.3,
+      "tokens_salida_media": 148.6,
+      "senales_descartadas": 1,
+      "fallos": {
+        "api_429": 1,
+        "esquema_invalido": 2,
+        "salida_truncada": 1
+      },
+      "metricas_solo_nivel2": {
+        "accuracy": 0.9577,
+        "f1_macro": 0.9591,
+        "precision_macro": 0.959,
+        "recall_macro": 0.96,
+        "por_clase": {
+          "legitimo": {
+            "precision": 0.9333,
+            "recall": 0.9333,
+            "f1": 0.9333,
+            "soporte": 15.0
+          },
+          "suplantacion_bancaria": {
+            "precision": 0.9333,
+            "recall": 1.0,
+            "f1": 0.9655,
+            "soporte": 14.0
+          },
+          "paqueteria_retenida": {
+            "precision": 0.9286,
+            "recall": 0.8667,
+            "f1": 0.8966,
+            "soporte": 15.0
+          },
+          "oferta_laboral_fraudulenta": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "soporte": 13.0
+          },
+          "extorsion": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "soporte": 14.0
+          }
+        },
+        "matriz_confusion": [
+          [
+            14,
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            14,
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            1,
+            13,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            13,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            14
+          ]
+        ],
+        "etiquetas": [
+          "legitimo",
+          "suplantacion_bancaria",
+          "paqueteria_retenida",
+          "oferta_laboral_fraudulenta",
+          "extorsion"
+        ]
+      }
+    }
+  },
+  "celda_elegida": "temp0_determinista",
+  "criterio": "mayor % JSON válido; empate → mayor acuerdo; empate → menor p95",
+  "umbral_usado": 0.75,
+  "metricas_cascada_val": {
+    "accuracy": 0.92,
+    "f1_macro": 0.9191,
+    "precision_macro": 0.9198,
+    "recall_macro": 0.92,
+    "por_clase": {
+      "legitimo": {
+        "precision": 0.8571,
+        "recall": 0.8,
+        "f1": 0.8276,
+        "soporte": 15.0
+      },
+      "suplantacion_bancaria": {
+        "precision": 0.9375,
+        "recall": 1.0,
+        "f1": 0.9677,
+        "soporte": 15.0
+      },
+      "paqueteria_retenida": {
+        "precision": 0.8667,
+        "recall": 0.8667,
+        "f1": 0.8667,
+        "soporte": 15.0
+      },
+      "oferta_laboral_fraudulenta": {
+        "precision": 1.0,
+        "recall": 0.9333,
+        "f1": 0.9655,
+        "soporte": 15.0
+      },
+      "extorsion": {
+        "precision": 0.9375,
+        "recall": 1.0,
+        "f1": 0.9677,
+        "soporte": 15.0
+      }
+    },
+    "matriz_confusion": [
+      [
+        12,
+        0,
+        2,
+        0,
+        1
+      ],
+      [
+        0,
+        15,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        13,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        14,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        15
+      ]
+    ],
+    "etiquetas": [
+      "legitimo",
+      "suplantacion_bancaria",
+      "paqueteria_retenida",
+      "oferta_laboral_fraudulenta",
+      "extorsion"
+    ]
+  },
+  "escalados_val": 18,
+  "discrepancias_val": 12
+}

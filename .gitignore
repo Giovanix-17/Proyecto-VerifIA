@@ -25,6 +25,10 @@ data/synthetic/*
 # --- Artefactos temporales ---
 *.log
 *.tmp
+data/reportes_fase5/log_*.txt
+data/reportes_fase5/*_parcial.jsonl
+# Caché local de los splits ya sanitizados (se reconstruye desde data/splits/).
+data/splits/sanitizado/
 
 # --- Sistema operativo ---
 .DS_Store

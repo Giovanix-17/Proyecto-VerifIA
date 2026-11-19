@@ -1,0 +1,72 @@
+{
+  "experimento": "B",
+  "fecha": "2026-11-18T20:24:27",
+  "revisor": "minimaxai/minimax-m3.1-flash",
+  "muestra": 100,
+  "validas": 100,
+  "kappa": 0.875,
+  "kappa_ic95_bootstrap": [
+    0.7983,
+    0.949
+  ],
+  "coincidencia_pct": 0.9,
+  "matriz_confusion": [
+    [
+      20,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      19,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      19,
+      0,
+      0
+    ],
+    [
+      5,
+      0,
+      0,
+      15,
+      0
+    ],
+    [
+      1,
+      0,
+      2,
+      0,
+      17
+    ]
+  ],
+  "etiquetas": [
+    "legitimo",
+    "suplantacion_bancaria",
+    "paqueteria_retenida",
+    "oferta_laboral_fraudulenta",
+    "extorsion"
+  ],
+  "origenes_muestra": {
+    "manual": 31,
+    "plantilla_legitima": 17,
+    "sintetico_llm": 52
+  },
+  "fallos": {},
+  "desacuerdos": 10,
+  "desacuerdos_csv": "data\\reportes_fase5\\kappa_b_desacuerdos.csv",
+  "adjudicacion": "confirmada por el autor (18/11/2026): 4 etiquetas humanas mantenidas y 6 lecturas del LLM aceptadas; ver CSV",
+  "adjudicacion_resumen": {
+    "humanas_mantenidas": 4,
+    "llm_aceptadas": 6,
+    "kappa_recalculado": false,
+    "nota": "No se recalcula el kappa: el adjudicador conocía la respuesta del LLM."
+  }
+}

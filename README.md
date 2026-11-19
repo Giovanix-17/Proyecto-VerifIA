@@ -36,6 +36,7 @@ Documentación del proyecto: [plan de trabajo](docs/plan_trabajo.md) ·
 [skills por fase](docs/skills_por_fase.md) · [revisión Fase 2](docs/reportes/revision_fase2.md) ·
 [cobertura de sanitización](docs/reportes/cobertura_sanitizacion.md) ·
 [OCR: CER/WER](docs/reportes/ocr_cer_wer.md) ·
+[métricas del clasificador](docs/reportes/metricas_clasificador.md) ·
 [verificación de API](docs/reportes/verificacion_api.md).
 
 ## Corpus (Fase 2)
@@ -123,6 +124,39 @@ CER 0.14 % y WER 0.80 %, sin fallas del pipeline. Las capturas son sintéticas,
 así que las cifras son una línea base reproducible y no una garantía en campo;
 el detalle está en el [reporte](docs/reportes/ocr_cer_wer.md).
 
+## Clasificador en cascada (Fase 5)
+
+El Nivel 1 es un TF-IDF de palabras y caracteres con Naive Bayes calibrado
+(`P(máxima) ≥ 0.75` resuelve sin red). La zona gris pasa a MiniMax-M3.1-Flash,
+que devuelve un JSON validado con Pydantic y cuyo contrato exige que cada señal
+exista literalmente en el texto. El umbral se ajustó **solo con validación**.
+
+En el conjunto de prueba reservado (75 mensajes, 15 por clase):
+
+| Configuración | F1 macro | Escalado | Latencia p50 |
+|---|---:|---:|---:|
+| Solo Nivel 1 | 0.9074 | 0 % | 12 ms |
+| Solo Nivel 2 | 0.9346 | 100 % | 72 s |
+| **Híbrido** | **0.9352** | **14.7 %** | **0.01 s** |
+
+El híbrido no dejó ningún fraude etiquetado como legítimo (60/60) y usó 11
+llamadas al LLM en lugar de 75. El Experimento B del kappa obtuvo un acuerdo
+humano–LLM de **0.875** (IC95 0.798–0.949): 0.972 en mensajes manuales y de
+plantilla, 0.779 en sintéticos. Limitaciones: dos `429` en la corrida de solo
+Nivel 2, muestra de test pequeña y latencia de la API gratuita con cola de ~80 s.
+El detalle, las matrices de confusión y la adjudicación de los 10 desacuerdos
+están en el [reporte de métricas](docs/reportes/metricas_clasificador.md).
+
+```powershell
+$env:PYTHONPATH = "src"
+python scripts/entrenar_nivel1.py
+python scripts/ajustar_umbral.py
+python scripts/comparar_llm.py --timeout 300
+python scripts/evaluar_fase5.py --timeout 300
+python scripts/kappa_experimento_b.py --timeout 300
+python scripts/figuras_fase5.py
+```
+
 ## Estado del proyecto
 
 | Fase | Estado |
@@ -131,7 +165,7 @@ el detalle está en el [reporte](docs/reportes/ocr_cer_wer.md).
 | 2 — Corpus etiquetado | Completada: 500 mensajes, 500 etiquetas confirmadas por el autor, 22 pruebas (17/11/2026) |
 | 3 — Sanitización | Completada: Presidio + spaCy `es_core_news_md`, 9 marcadores, 120 mensajes anotados, cero PII superviviente (17/11/2026) |
 | 4 — OCR | Completada: pipeline PNG/JPEG con Tesseract `spa`, límites, preprocesamiento y 60 capturas sintéticas con CER 0.14 % (17/11/2026) |
-| 5 — Clasificador en cascada | Pendiente |
+| 5 — Clasificador en cascada | Completada: F1 macro 0.9352, recall binario de fraude 100 %, 14.7 % escalado, kappa humano–LLM 0.875 (18/11/2026) |
 | 6 — Explicabilidad | Pendiente |
 | 7 — Interfaz web | Pendiente |
 | 8 — Validación | Pendiente |

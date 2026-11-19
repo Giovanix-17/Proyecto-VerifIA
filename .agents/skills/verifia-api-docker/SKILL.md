@@ -66,7 +66,7 @@ class ResultadoAnalisis(BaseModel):
 | Texto | 10 000 caracteres | 422 con mensaje claro |
 | Imagen | 5 MB / 4000 px / 12 MP | 413 o 422 según el caso |
 | Frecuencia | por IP, en memoria | 429 + `Retry-After` |
-| Timeout del LLM | 60 s, 1 reintento | fallback, no 5xx |
+| Timeout del LLM | 180 s, 1 reintento | fallback, no 5xx |
 
 - Rate limit **en memoria** (token bucket o ventana deslizante por IP): sin Redis. Documenta el valor y
   límpialo periódicamente para no crecer sin control.

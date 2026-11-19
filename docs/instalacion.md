@@ -133,7 +133,7 @@ Notas del diseño del contenedor:
 | `LLM_MODEL` | Modelo del Nivel 2 de la cascada | `minimaxai/minimax-m3.1-flash` |
 | `LLM_REVIEWER_MODEL` | Revisor automático del kappa (distinto del Nivel 2) | `meta/muse-glimmer-30b` |
 | `LLM_CORPUS_MODEL` | Generación del corpus sintético | `nvidia/nemotron-3.5-bolt-e4b` |
-| `LLM_TIMEOUT_S` | Timeout por llamada | `60` |
+| `LLM_TIMEOUT_S` | Timeout por llamada | `180` |
 | `LLM_MAX_TOKENS` | Tope de tokens de salida | `1300` |
 | `LLM_MAX_REINTENTOS` | Intentos totales ante 400/429/5xx/timeout | `3` |
 | `LLM_RETRY_BASE_S` | Espera inicial entre reintentos (2, 4, 8 s) | `2` |

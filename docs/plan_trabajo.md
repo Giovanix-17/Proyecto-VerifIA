@@ -13,7 +13,7 @@ Documento de planeación de la Fase 1 (Actividad 1). Fuente de verdad:
 | Institución | Universidad Tecnológica de Tabasco — DATIC |
 | Periodo referencial | 29/09/2026 – 28/12/2026 |
 | Versión de este plan | 1.2 (16/11/2026) |
-| Estado | Aprobado; Fase 1 y Fase 2 completadas (16/11/2026) |
+| Estado | Aprobado; Fases 1–5 completadas (18/11/2026) |
 
 ---
 

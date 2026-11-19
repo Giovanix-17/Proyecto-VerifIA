@@ -47,7 +47,8 @@ parecido con el perfil de DeepSeek; `nvidia/nemotron-3.5-lightning-30b-a3b`
 queda documentado como alternativa si se prioriza latencia y costo.
 
 > **Revisado el 17/11/2026:** con el prompt real de §8.4, Mistral tarda
-> 89.9–175.3 s y excede `LLM_TIMEOUT_S=60`. El revisor definitivo pasó a
+> 89.9–175.3 s y excedía `LLM_TIMEOUT_S=60` (valor vigente entonces; desde el
+> 18/11/2026 es 180 s). El revisor definitivo pasó a
 > `meta/muse-glimmer-30b` (35.6–36.2 s). Ver «Actualización del 17/11/2026».
 
 ## Implicaciones
@@ -91,7 +92,7 @@ MiniMax).
 
 | Modelo | Llamadas | Latencia | JSON válido | Decisión |
 |---|---|---:|---|---|
-| `mistralai/mistral-large-4-1t-a52b` | 4 exitosas + 3 con timeout | 89.9–175.3 s | Sí | **Descartado:** excede `LLM_TIMEOUT_S=60` |
+| `mistralai/mistral-large-4-1t-a52b` | 4 exitosas + 3 con timeout | 89.9–175.3 s | Sí | **Descartado:** excedía el timeout de entonces (60 s) |
 | **`meta/muse-glimmer-30b`** | 4 | **35.6–36.2 s** | Sí | **Elegido** |
 | `google/gemma-4-31b-it` | 1 | 65.8 s | Sí | Descartado por latencia |
 | `stepfun-ai/step-5-preview` | 1 | 75.2 s | Sí | Descartado por latencia |

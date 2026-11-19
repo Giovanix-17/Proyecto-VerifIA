@@ -156,7 +156,7 @@ La clave va en `.env` como `NVIDIA_API_KEY`. **Solo se usa la API de NVIDIA**; n
 |---|---|---|
 | **Nivel 2 (cascada)** — principal | `minimaxai/minimax-m3.1-flash` | 428B / 23B activos, *Structured Output* explícito; **único candidato operativo** tras el HTTP 410 de DeepSeek (verificado el 17/11/2026). Licencia "research and development only" en NVIDIA, a citar en el reporte |
 | **Nivel 2 — alternativa** | `deepseek-ai/deepseek-v4.1-flash` (**no disponible**: HTTP 410 desde el 16/11/2026) | Base MIT, 552B / 8B activos, KV cache en FP4 (890 bytes/token) → menor latencia y costo; se conserva como referencia histórica y se reevaluará si NVIDIA lo repone |
-| **Revisor automático** (kappa, §8.7) | `meta/muse-glimmer-30b` | Modelo distinto del Nivel 2 para evitar circularidad. JSON válido en 35.6–36.2 s con el prompt real; Mistral-Large-4 se descartó por latencias de 90–175 s, incompatibles con el timeout de 60 s (verificado el 17/11/2026) |
+| **Revisor automático** (kappa, §8.7) | `meta/muse-glimmer-30b` | Modelo distinto del Nivel 2 para evitar circularidad. JSON válido en 35.6–36.2 s con el prompt real; Mistral-Large-4 se descartó por latencias de 90–175 s, incompatibles con el timeout de entonces (60 s; hoy 180 s) y sin margen suficiente (verificado el 17/11/2026) |
 | **Generación del corpus** (Fase 2) | `nvidia/nemotron-3.5-bolt-e4b` | 8B (4B efectivos), Apache 2.0, español entre los idiomas focales de su post-training, *Structured Output*; barato y rápido para generar cientos de mensajes |
 
 El modelo se elige con variables de entorno, sin tocar código:
@@ -166,7 +166,7 @@ NVIDIA_API_KEY=...
 LLM_MODEL=minimaxai/minimax-m3.1-flash        # Nivel 2 (DeepSeek devuelve 410)
 LLM_REVIEWER_MODEL=meta/muse-glimmer-30b      # revisor automático (kappa)
 LLM_CORPUS_MODEL=nvidia/nemotron-3.5-bolt-e4b     # generación de corpus sintético
-LLM_TIMEOUT_S=60
+LLM_TIMEOUT_S=180
 LLM_MAX_TOKENS=1300
 LLM_MAX_REINTENTOS=3
 LLM_RETRY_BASE_S=2
@@ -175,7 +175,7 @@ LLM_REASONING_EFFORT=low
 
 **Parámetros de llamada.** Endpoint `https://integrate.api.nvidia.com/v1/chat/completions`, compatible con la API de OpenAI (`openai` de Python con `base_url` NVIDIA).
 
-- `timeout` 60 s, hasta **3 intentos** con espera exponencial (2, 4, 8 s) ante 400/429/5xx/timeout, `max_tokens` 1300.
+- `timeout` 180 s, hasta **3 intentos** con espera exponencial (2, 4, 8 s) ante 400/429/5xx/timeout, `max_tokens` 1300.
 - `reasoning_effort` **bajo**: ambos modelos grandes son "razonadores" y emiten un bloque de razonamiento antes de la respuesta; para una tarea de 5 clases el esfuerzo alto solo añade latencia y costo.
 - **Muestreo:** los modelos recomiendan `temperature=1.0`, `top_p=0.95`, pero para una clasificación repetible se prueba en la Fase 5 `temperature=0` contra el valor recomendado y **se conserva el que tenga mayor tasa de JSON válido y mayor acuerdo con las etiquetas humanas**. La comparación queda documentada.
 - **Extracción del JSON:** la respuesta útil viene dentro de `content`, después del bloque de razonamiento (`reasoning_content`). El parser debe **extraer el primer objeto JSON balanceado** del texto, no asumir que todo `content` es JSON. Si la extracción o la validación Pydantic fallan → fallback (regla 8).
@@ -637,7 +637,7 @@ En cada fase, usa la skill principal y las de apoyo que lista la **§17**.
 | 2 | Enmascarado de `[CODIGO]` | 4–8 dígitos **con contexto de solicitud** (≤30 caracteres); no enmascara montos, %, fechas ni folios |
 | 3 | Puntuación 0–100 | `100 × (1 − P(legitimo))`; en zona gris `max(LLM, Nivel 1)`; fallback = Nivel 1 + "análisis parcial" |
 | 4 | Nivel de riesgo | **Derivado** de la puntuación; en el corpus es opcional y solo referencia |
-| 5 | Límites del sistema | Imagen ≤ 5 MB, ≤ 4000 px, ≤ 12 MP (PNG/JPEG); texto ≤ 10 000 caracteres; LLM timeout 60 s, hasta 3 intentos, `max_tokens` 1300, `reasoning_effort` bajo; corpus sintético con `max_tokens` 2600 por lote |
+| 5 | Límites del sistema | Imagen ≤ 5 MB, ≤ 4000 px, ≤ 12 MP (PNG/JPEG); texto ≤ 10 000 caracteres; LLM timeout 180 s, hasta 3 intentos, `max_tokens` 1300, `reasoning_effort` bajo; corpus sintético con `max_tokens` 2600 por lote |
 | 6 | Fiabilidad de la anotación | **Revisor automático con LLM** sobre el 20 % estratificado; se reporta como *acuerdo humano–LLM* (no inter-humano); desacuerdos adjudicados a mano |
 | 7 | Plan de trabajo | La Fase 1 entra como **primer paso del §14**, con entregable `docs/plan_trabajo.md` |
 | 8 | Entorno de ejecución | **Docker Desktop (WSL2)** como opción principal; venv documentado como alternativa |

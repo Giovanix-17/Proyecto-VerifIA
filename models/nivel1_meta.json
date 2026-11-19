@@ -1,0 +1,206 @@
+{
+  "version": "1.0",
+  "fecha": "2026-11-18T03:26:19+00:00",
+  "ganador": "naive_bayes",
+  "mejores_parametros": {
+    "modelo__alpha": "0.1"
+  },
+  "candidatos": {
+    "regresion_logistica": {
+      "mejores_parametros": {
+        "modelo__C": "10.0"
+      },
+      "f1_macro_cv_train": 0.9309,
+      "f1_macro_val": 0.7698
+    },
+    "svm_lineal": {
+      "mejores_parametros": {
+        "modelo__C": "3.0"
+      },
+      "f1_macro_cv_train": 0.9432,
+      "f1_macro_val": 0.8116
+    },
+    "naive_bayes": {
+      "mejores_parametros": {
+        "modelo__alpha": "0.1"
+      },
+      "f1_macro_cv_train": 0.8945,
+      "f1_macro_val": 0.8668
+    }
+  },
+  "metricas_val_calibrado": {
+    "accuracy": 0.8667,
+    "f1_macro": 0.8668,
+    "precision_macro": 0.877,
+    "recall_macro": 0.8667,
+    "por_clase": {
+      "legitimo": {
+        "precision": 0.7059,
+        "recall": 0.8,
+        "f1": 0.75,
+        "soporte": 15.0
+      },
+      "suplantacion_bancaria": {
+        "precision": 1.0,
+        "recall": 0.7333,
+        "f1": 0.8462,
+        "soporte": 15.0
+      },
+      "paqueteria_retenida": {
+        "precision": 0.8667,
+        "recall": 0.8667,
+        "f1": 0.8667,
+        "soporte": 15.0
+      },
+      "oferta_laboral_fraudulenta": {
+        "precision": 0.875,
+        "recall": 0.9333,
+        "f1": 0.9032,
+        "soporte": 15.0
+      },
+      "extorsion": {
+        "precision": 0.9375,
+        "recall": 1.0,
+        "f1": 0.9677,
+        "soporte": 15.0
+      }
+    },
+    "matriz_confusion": [
+      [
+        12,
+        0,
+        1,
+        1,
+        1
+      ],
+      [
+        3,
+        11,
+        0,
+        1,
+        0
+      ],
+      [
+        2,
+        0,
+        13,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        14,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        15
+      ]
+    ],
+    "etiquetas": [
+      "legitimo",
+      "suplantacion_bancaria",
+      "paqueteria_retenida",
+      "oferta_laboral_fraudulenta",
+      "extorsion"
+    ]
+  },
+  "n_train": 350,
+  "n_val": 75,
+  "semilla": 42,
+  "calibracion": "CalibratedClassifierCV(sigmoid, cv=5)",
+  "hashes_splits": {
+    "train.jsonl": "c22dfb1015e4d091bf9ebea9542c557ebd43ea2713f03d53165a1ff3d97ea1f5",
+    "val.jsonl": "450388859649764d3dc7610fdb953ff1c999da0c8c871bc6a6d0a998a6912622",
+    "test.jsonl": "d44f23abdb6118ad2045a23ba530341b57d2a2845412a663f9f74cb9d44eb301"
+  },
+  "umbral_confianza": 0.75,
+  "umbral_criterio": "recall seguro ≥ 0.90 en fraude, mínimos escalados (val)",
+  "umbral_barrido": [
+    {
+      "umbral": 0.5,
+      "escalado_pct": 0.0533,
+      "resueltos_pct": 0.9467,
+      "fraude_mal_resuelto": 5,
+      "recall_seguro_fraude": 0.9167,
+      "precision_en_resueltos": 0.9014
+    },
+    {
+      "umbral": 0.55,
+      "escalado_pct": 0.0667,
+      "resueltos_pct": 0.9333,
+      "fraude_mal_resuelto": 5,
+      "recall_seguro_fraude": 0.9167,
+      "precision_en_resueltos": 0.9
+    },
+    {
+      "umbral": 0.6,
+      "escalado_pct": 0.08,
+      "resueltos_pct": 0.92,
+      "fraude_mal_resuelto": 4,
+      "recall_seguro_fraude": 0.9333,
+      "precision_en_resueltos": 0.913
+    },
+    {
+      "umbral": 0.65,
+      "escalado_pct": 0.12,
+      "resueltos_pct": 0.88,
+      "fraude_mal_resuelto": 2,
+      "recall_seguro_fraude": 0.9667,
+      "precision_en_resueltos": 0.9394
+    },
+    {
+      "umbral": 0.7,
+      "escalado_pct": 0.1867,
+      "resueltos_pct": 0.8133,
+      "fraude_mal_resuelto": 2,
+      "recall_seguro_fraude": 0.9667,
+      "precision_en_resueltos": 0.9344
+    },
+    {
+      "umbral": 0.75,
+      "escalado_pct": 0.24,
+      "resueltos_pct": 0.76,
+      "fraude_mal_resuelto": 1,
+      "recall_seguro_fraude": 0.9833,
+      "precision_en_resueltos": 0.9474
+    },
+    {
+      "umbral": 0.8,
+      "escalado_pct": 0.2667,
+      "resueltos_pct": 0.7333,
+      "fraude_mal_resuelto": 1,
+      "recall_seguro_fraude": 0.9833,
+      "precision_en_resueltos": 0.9455
+    },
+    {
+      "umbral": 0.85,
+      "escalado_pct": 0.6,
+      "resueltos_pct": 0.4,
+      "fraude_mal_resuelto": 1,
+      "recall_seguro_fraude": 0.9833,
+      "precision_en_resueltos": 0.9333
+    },
+    {
+      "umbral": 0.9,
+      "escalado_pct": 1.0,
+      "resueltos_pct": 0.0,
+      "fraude_mal_resuelto": 0,
+      "recall_seguro_fraude": 1.0,
+      "precision_en_resueltos": 0.0
+    },
+    {
+      "umbral": 0.95,
+      "escalado_pct": 1.0,
+      "resueltos_pct": 0.0,
+      "fraude_mal_resuelto": 0,
+      "recall_seguro_fraude": 1.0,
+      "precision_en_resueltos": 0.0
+    }
+  ]
+}

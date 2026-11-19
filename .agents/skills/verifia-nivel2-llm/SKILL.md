@@ -32,7 +32,7 @@ from openai import OpenAI
 client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
     api_key=os.environ["NVIDIA_API_KEY"],
-    timeout=float(os.environ.get("LLM_TIMEOUT_S", 60)),
+    timeout=float(os.environ.get("LLM_TIMEOUT_S", 180)),
     max_retries=1,          # 1 reintento, según §6.1
 )
 

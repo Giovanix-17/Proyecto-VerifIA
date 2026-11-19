@@ -180,7 +180,7 @@ no se alteró. El corpus mantiene 500 mensajes y 100 por clase.
 | Nivel 2 | `minimaxai/minimax-m3.1-flash` | ✅ JSON válido; 144–284 tokens de salida; 503 y 400 transitorios cubiertos con reintentos |
 | Nivel 2 anterior | `deepseek-ai/deepseek-v4.1-flash` | ❌ **HTTP 410**; no aparece en `/v1/models` |
 | Revisor | `meta/muse-glimmer-30b` | ✅ JSON válido; 35.6–36.2 s; 291–302 tokens de salida |
-| Revisor descartado | `mistralai/mistral-large-4-1t-a52b` | ⚠️ JSON válido, pero 89.9–175.3 s: excede `LLM_TIMEOUT_S=60` |
+| Revisor descartado | `mistralai/mistral-large-4-1t-a52b` | ⚠️ JSON válido, pero 89.9–175.3 s: excedía `LLM_TIMEOUT_S=60` (valor de entonces) |
 | Revisor alternativo | `nvidia/nemotron-3.5-lightning-30b-a3b` | ❌ JSON inválido con el prompt real (2 intentos) |
 
 **Hallazgo crítico:** DeepSeek-V4.1-Flash ya no está disponible en la API de
