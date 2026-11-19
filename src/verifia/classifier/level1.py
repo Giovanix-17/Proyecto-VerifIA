@@ -216,9 +216,22 @@ CANDIDATOS: dict[str, tuple[object, dict]] = {
 # --------------------------------------------------------------------------- #
 # Probabilidades → puntuación (§8.6)
 # --------------------------------------------------------------------------- #
-def puntuacion_nivel1(probabilidades: np.ndarray) -> int:
-    """``round(100 × (1 − P(mensaje_legitimo)))`` con el modelo calibrado."""
-    p_legitimo = float(np.asarray(probabilidades)[INDICE_LEGITIMO])
+def puntuacion_nivel1(
+    probabilidades: np.ndarray, clases: Iterable[str] | None = None
+) -> int:
+    """``round(100 × (1 − P(mensaje_legitimo)))`` con el modelo calibrado.
+
+    ``clases`` debe ser ``modelo.classes_``: scikit-learn ordena las clases
+    alfabéticamente y ese orden **no** coincide con :data:`TIPOLOGIAS`. Si no
+    se pasa, se asume el orden del catálogo (útil en pruebas con modelos
+    falsos), pero en producción siempre se pasa el orden real del modelo.
+    """
+    vector = np.asarray(probabilidades)
+    if clases is None:
+        indice = INDICE_LEGITIMO
+    else:
+        indice = [str(clase) for clase in clases].index("legitimo")
+    p_legitimo = float(vector[indice])
     return int(round(100 * (1 - p_legitimo)))
 
 

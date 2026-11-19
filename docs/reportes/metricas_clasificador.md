@@ -281,9 +281,13 @@ garantizado en una muestra nueva.
   0.9456 (n=73). Es una **cota superior no alcanzable en operación**: un fallo de
   API no desaparece, se degrada. El híbrido no tuvo fallos en su zona gris
   (0/11) y por eso no necesitó ese ajuste.
-- **Ocho discrepancias de puntuación** en la zona gris (`puntuacion_LLM <
+- **Cinco discrepancias de puntuación** en la zona gris (`puntuacion_LLM <
   puntuacion_N1`). La regla `max()` conservó el riesgo mayor y solo registró la
-  diferencia; no cambió ninguna etiqueta.
+  diferencia; no cambió ninguna etiqueta. *Nota de la Fase 6:* la cifra inicial
+  de ocho se recalculó al corregir el índice de la clase legítima en
+  `puntuacion_nivel1`; el detalle está en
+  [`explicabilidad.md`](explicabilidad.md). La corrección no altera F1, recall
+  ni la matriz de confusión, porque esas métricas se calculan con `argmax`.
 - **La zona gris aportó exactamente lo previsto.** De los 11 mensajes
   escalados, el Nivel 1 acertaba 9 y fallaba 2 (oferta laboral); el LLM acertó
   los 11 y corrigió esos dos. Los otros 64 mensajes se resolvieron sin red.

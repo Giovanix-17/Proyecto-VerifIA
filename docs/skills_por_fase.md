@@ -57,7 +57,7 @@ corrige la skill, no la memoria.
 - [x] **Fase 3** — `verifia-sanitizacion` → Presidio + `es_core_news_md`, 9 marcadores, reconocedores Luhn/CLABE/CURP/RFC y regla de `[CODIGO]`; 120 mensajes anotados (141 entidades), cero supervivencias y cero hallazgos duros en los 500 mensajes del corpus (17/11/2026).
 - [x] **Fase 4** — `verifia-ocr` + `webapp-testing` (capturas sintéticas) + `scientific-visualization` → validación PNG/JPEG, preprocesamiento OpenCV, Tesseract `spa`, posprocesamiento y 60 capturas sintéticas (claro/oscuro, 4 resoluciones, WhatsApp/SMS) con CER 0.14 % y WER 0.80 % (17/11/2026).
 - [x] **Fase 5** — `scikit-learn` + `verifia-nivel2-llm` + `statistical-analysis` → tres configuraciones comparadas en test (híbrido F1 macro 0.9352, recall binario de fraude 100 %, 14.7 % escalado), figuras y Experimento B del kappa (0.875; IC95 0.798–0.949) con 10 desacuerdos adjudicados (18/11/2026).
-- [ ] **Fase 6** — `verifia-explicabilidad` → semáforo y recomendaciones.
+- [x] **Fase 6** — `verifia-explicabilidad` → `src/verifia/explain/` con semáforo de tres estados derivado de la puntuación, hasta 5 señales resaltadas con offsets y origen, resumen determinista de tres frases, catálogo cerrado de recomendaciones por tipología y aviso orientativo en los tres caminos de la cascada; 15 snapshots y 171 pruebas en verde (18/11/2026).
 - [ ] **Fase 7** — `verifia-api-docker` + `frontend-design` + `web-design-guidelines` + `webapp-testing` → sistema integrado.
 - [ ] **Fase 8** — `verifia-validacion` + `statistical-analysis` + `webapp-testing` → reporte de validación.
 - [ ] **Fase 9** — `markdown-mermaid-writing` + `citation-management` → documento final.

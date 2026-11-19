@@ -1,0 +1,27 @@
+{
+  "legitimo": {
+    "bajo": "El mensaje se parece a un mensaje legítimo. La señal más importante es: no se identificó una señal textual concreta. Aun así, verifique por un canal oficial si algo le parece extraño.",
+    "medio": "El mensaje se parece a un mensaje legítimo. La señal más importante es: no se identificó una señal textual concreta. Aun así, verifique por un canal oficial si algo le parece extraño.",
+    "alto": "El mensaje se parece a un mensaje legítimo. La señal más importante es: no se identificó una señal textual concreta. Aun así, verifique por un canal oficial si algo le parece extraño."
+  },
+  "suplantacion_bancaria": {
+    "bajo": "El mensaje se parece a una suplantación bancaria. La señal más importante es: no se identificó una señal textual concreta. Si comparte el código, otra persona podría autorizar cargos en su cuenta.",
+    "medio": "El mensaje se parece a una suplantación bancaria. La señal más importante es: no se identificó una señal textual concreta. Si comparte el código, otra persona podría autorizar cargos en su cuenta.",
+    "alto": "El mensaje se parece a una suplantación bancaria. La señal más importante es: no se identificó una señal textual concreta. Si comparte el código, otra persona podría autorizar cargos en su cuenta."
+  },
+  "paqueteria_retenida": {
+    "bajo": "El mensaje se parece a un aviso de paquetería con un paquete retenido. La señal más importante es: no se identificó una señal textual concreta. Si paga o da sus datos en ese enlace, el cobro o el robo de datos puede ocurrir de inmediato.",
+    "medio": "El mensaje se parece a un aviso de paquetería con un paquete retenido. La señal más importante es: no se identificó una señal textual concreta. Si paga o da sus datos en ese enlace, el cobro o el robo de datos puede ocurrir de inmediato.",
+    "alto": "El mensaje se parece a un aviso de paquetería con un paquete retenido. La señal más importante es: no se identificó una señal textual concreta. Si paga o da sus datos en ese enlace, el cobro o el robo de datos puede ocurrir de inmediato."
+  },
+  "oferta_laboral_fraudulenta": {
+    "bajo": "El mensaje se parece a una oferta de trabajo fraudulenta. La señal más importante es: no se identificó una señal textual concreta. Si adelanta dinero o entrega documentos, es muy probable que no recupere el pago.",
+    "medio": "El mensaje se parece a una oferta de trabajo fraudulenta. La señal más importante es: no se identificó una señal textual concreta. Si adelanta dinero o entrega documentos, es muy probable que no recupere el pago.",
+    "alto": "El mensaje se parece a una oferta de trabajo fraudulenta. La señal más importante es: no se identificó una señal textual concreta. Si adelanta dinero o entrega documentos, es muy probable que no recupere el pago."
+  },
+  "extorsion": {
+    "bajo": "El mensaje se parece a una extorsión. La señal más importante es: no se identificó una señal textual concreta. Responder o pagar suele aumentar la presión y las exigencias.",
+    "medio": "El mensaje se parece a una extorsión. La señal más importante es: no se identificó una señal textual concreta. Responder o pagar suele aumentar la presión y las exigencias.",
+    "alto": "El mensaje se parece a una extorsión. La señal más importante es: no se identificó una señal textual concreta. Responder o pagar suele aumentar la presión y las exigencias."
+  }
+}

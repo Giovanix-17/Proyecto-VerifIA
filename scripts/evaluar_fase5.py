@@ -213,7 +213,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     clases = list(modelo_n1.classes_)
     y_n1 = [clases[int(p.argmax())] for p in probabilidades]
-    p_n1 = [level1.puntuacion_nivel1(p) for p in probabilidades]
+    p_n1 = [level1.puntuacion_nivel1(p, clases) for p in probabilidades]
     salida["configuraciones"]["solo_nivel1"] = {
         "metricas": metricas_clasificacion(y_verdad, y_n1),
         "escalado_pct": 0.0,

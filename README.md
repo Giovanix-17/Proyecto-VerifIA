@@ -37,6 +37,7 @@ Documentación del proyecto: [plan de trabajo](docs/plan_trabajo.md) ·
 [cobertura de sanitización](docs/reportes/cobertura_sanitizacion.md) ·
 [OCR: CER/WER](docs/reportes/ocr_cer_wer.md) ·
 [métricas del clasificador](docs/reportes/metricas_clasificador.md) ·
+[explicabilidad](docs/reportes/explicabilidad.md) ·
 [verificación de API](docs/reportes/verificacion_api.md).
 
 ## Corpus (Fase 2)
@@ -157,6 +158,37 @@ python scripts/kappa_experimento_b.py --timeout 300
 python scripts/figuras_fase5.py
 ```
 
+## Explicabilidad (Fase 6)
+
+Cada dictamen se traduce a un resultado que un ciudadano puede usar: un **semáforo
+de tres estados** derivado siempre de la puntuación final (0–33 verde, 34–66
+amarillo, 67–100 rojo), **hasta cinco señales resaltadas** sobre el texto
+sanitizado con sus offsets y su origen, un **resumen determinista de tres
+frases** en lenguaje sencillo y **recomendaciones de un catálogo cerrado** por
+tipología. El resumen no se genera con el LLM y el estado no depende del
+`nivel_riesgo` que propuso el modelo. El color nunca es el único canal: cada
+estado lleva título, descripción e icono (✔, ⚠, ⛔), conforme a WCAG 2.1. El
+aviso orientativo aparece en el 100 % de las respuestas, incluido el fallback.
+
+```python
+import joblib
+from verifia.classifier.cascade import CascadeVerifIA
+
+modelo = joblib.load("models/nivel1.joblib")
+resultado = CascadeVerifIA(modelo, llamar_llm=False).analizar(
+    "Su cuenta será bloqueada hoy. Ingrese su código"
+)
+resultado.estado            # 'rojo'
+resultado.puntuacion        # 93
+resultado.senales_alerta    # [SenalResaltada(...), ...] con frase, categoria, inicio, fin
+resultado.recomendaciones   # catálogo fijo, nunca texto del LLM
+resultado.aviso             # herramienta orientativa (regla 13)
+```
+
+El módulo no reclasifica ni recalcula la puntuación: solo explica lo que ya
+decidió la cascada. Detalle, contrato de salida y limitaciones en el
+[reporte de explicabilidad](docs/reportes/explicabilidad.md).
+
 ## Estado del proyecto
 
 | Fase | Estado |
@@ -166,7 +198,7 @@ python scripts/figuras_fase5.py
 | 3 — Sanitización | Completada: Presidio + spaCy `es_core_news_md`, 9 marcadores, 120 mensajes anotados, cero PII superviviente (17/11/2026) |
 | 4 — OCR | Completada: pipeline PNG/JPEG con Tesseract `spa`, límites, preprocesamiento y 60 capturas sintéticas con CER 0.14 % (17/11/2026) |
 | 5 — Clasificador en cascada | Completada: F1 macro 0.9352, recall binario de fraude 100 %, 14.7 % escalado, kappa humano–LLM 0.875 (18/11/2026) |
-| 6 — Explicabilidad | Pendiente |
+| 6 — Explicabilidad | Completada: semáforo 0–100, hasta 5 señales con offsets, resumen de 3 frases, catálogo cerrado por tipología y aviso orientativo en todos los caminos; 171 pruebas (18/11/2026) |
 | 7 — Interfaz web | Pendiente |
 | 8 — Validación | Pendiente |
 | 9 — Documentación final | Pendiente |

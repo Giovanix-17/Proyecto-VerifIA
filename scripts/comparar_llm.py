@@ -298,7 +298,7 @@ def main(argv: list[str] | None = None) -> int:
                 continue
             escalados += 1
             acierto = dictamenes.get(fila["id"])
-            p_n1 = level1.puntuacion_nivel1(proba)
+            p_n1 = level1.puntuacion_nivel1(proba, clases)
             if acierto is None:
                 y_final.append(clases[int(proba.argmax())])  # fallback
                 continue

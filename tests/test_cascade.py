@@ -94,6 +94,9 @@ def test_alta_confianza_no_escala() -> None:
     # puntuacion = round(100*(1-0.95)) = 5
     assert resultado.puntuacion == 5
     assert resultado.nivel_riesgo == "bajo"
+    assert resultado.estado == "verde"
+    assert resultado.aviso
+    assert len(resultado.recomendaciones) >= 3
     assert modelo.llamadas == 1
 
 
@@ -106,7 +109,9 @@ def test_alta_confianza_fraude() -> None:
     assert resultado.tipologia == "suplantacion_bancaria"
     assert resultado.puntuacion == 98
     assert resultado.nivel_riesgo == "alto"
+    assert resultado.estado == "rojo"
     assert resultado.fuente_diccionario == "nivel_1"
+    assert resultado.recomendaciones
 
 
 # --------------------------------------------------------------------------- #
@@ -124,6 +129,11 @@ def test_zona_gris_llm_valido_con_discrepancia() -> None:
     assert resultado.puntuacion == 70
     assert resultado.discrepancia_niveles
     assert resultado.nivel_riesgo == "alto"
+    assert resultado.estado == "rojo"
+    assert resultado.senales_alerta
+    assert resultado.senales_alerta[0].origen == "nivel_2"
+    assert resultado.senales_alerta[0].frase in TEXTO
+    assert resultado.senales_alerta[0].inicio is not None
 
 
 def test_zona_gris_llm_con_riesgo_mayor() -> None:
@@ -145,6 +155,8 @@ def test_zona_gris_json_invalido_fallback() -> None:
     assert resultado.escalado_a_llm
     assert any("parcial" in a for a in resultado.advertencias)
     assert resultado.puntuacion == 70  # puntuacion_nivel1
+    assert resultado.estado == "rojo"
+    assert resultado.aviso
     assert not resultado.discrepancia_niveles
 
 
@@ -158,6 +170,8 @@ def test_zona_gris_timeout_fallback() -> None:
     _modelo, _cliente, resultado = probar(proba, ClienteTimeout("x"))
     assert resultado.fuente_diccionario == "nivel_1_fallback"
     assert ADVERTENCIA_PARCIAL in resultado.advertencias
+    assert resultado.estado == "rojo"
+    assert resultado.aviso
 
 
 # --------------------------------------------------------------------------- #
@@ -168,6 +182,19 @@ def test_sin_cliente_fallback() -> None:
     _modelo, _cliente, resultado = probar(proba, cliente=None)
     assert resultado.fuente_diccionario == "nivel_1_fallback"
     assert resultado.escalado_a_llm
+    assert ADVERTENCIA_PARCIAL in resultado.advertencias
+    assert resultado.estado == "rojo"
+
+
+def test_texto_vacio_resultado_completo() -> None:
+    modelo = ModeloFalso([1.0, 0.0, 0.0, 0.0, 0.0])
+    resultado = CascadeVerifIA(modelo, None).analizar("   ")
+    assert resultado.puntuacion == 0
+    assert resultado.estado == "verde"
+    assert resultado.tipologia == "legitimo"
+    assert resultado.resumen_legible.startswith("El mensaje está vacío")
+    assert resultado.aviso
+    assert len(resultado.recomendaciones) >= 3
 
 
 # --------------------------------------------------------------------------- #

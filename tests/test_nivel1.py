@@ -45,10 +45,25 @@ def test_rasgos_estructurales_sin_entrada() -> None:
 def test_puntuacion_y_banda() -> None:
     proba = np.array([0.30, 0.70, 0.0, 0.0, 0.0])
     # round(100 * (1 - 0.30)) = 70 (§8.6)
-    assert puntuacion_nivel1(proba) == 70
+    assert puntuacion_nivel1(proba, TIPOLOGIAS) == 70
     assert nivel_riesgo_de_puntuacion(70) == "alto"
     assert nivel_riesgo_de_puntuacion(50) == "medio"
     assert nivel_riesgo_de_puntuacion(10) == "bajo"
+
+
+def test_puntuacion_usa_el_orden_real_del_modelo() -> None:
+    # scikit-learn ordena las clases alfabéticamente: 'legitimo' no está en la
+    # posición 0. La puntuación debe leer la probabilidad de 'legitimo', no la
+    # de 'extorsion' (regresión del bug detectado al integrar la Fase 6).
+    clases = [
+        "extorsion",
+        "legitimo",
+        "oferta_laboral_fraudulenta",
+        "paqueteria_retenida",
+        "suplantacion_bancaria",
+    ]
+    proba = np.array([0.90, 0.05, 0.02, 0.02, 0.01])
+    assert puntuacion_nivel1(proba, clases) == 95
 
 
 def _datos_minimos() -> tuple[list[dict], list[str]]:
