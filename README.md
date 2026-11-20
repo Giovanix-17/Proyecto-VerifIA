@@ -204,6 +204,10 @@ build, en `http://localhost:8000`. El flujo visible tiene cuatro pasos:
 3. Analizar (estado de espera con el botón deshabilitado).
 4. Ver el semáforo, las señales resaltadas y las recomendaciones.
 
+![Demostración de la interfaz web de VerifIA](docs/reportes/figuras/Demostracion.png)
+
+> Figura: Interfaz de 4 pasos — paso 1: subir una captura de pantalla para analizar.
+
 | Endpoint | Uso |
 |---|---|
 | `GET /health` | Comprobación de vida (`{"status":"ok","version":"0.1.0"}`) |
