@@ -229,35 +229,19 @@ contenedor corre en modo de solo lectura.
 
 El E2E de Playwright recorre texto e imagen, comprueba el foco, los errores
 anunciados, el veredicto no cromático y la ausencia de scroll horizontal en
-móvil. Detalle, tablas de contraste y limitaciones en el
-[reporte de interfaz](docs/reportes/interfaz_web.md).
-
-## Estado del proyecto
-
-| Fase | Estado |
-|---|---|
-| 1 — Planeación, repositorio y contenedor | Completada y aprobada (16/11/2026) |
-| 2 — Corpus etiquetado | Completada: 500 mensajes, 500 etiquetas confirmadas por el autor, 22 pruebas (17/11/2026) |
-| 3 — Sanitización | Completada: Presidio + spaCy `es_core_news_md`, 9 marcadores, 120 mensajes anotados, cero PII superviviente (17/11/2026) |
-| 4 — OCR | Completada: pipeline PNG/JPEG con Tesseract `spa`, límites, preprocesamiento y 60 capturas sintéticas con CER 0.14 % (17/11/2026) |
-| 5 — Clasificador en cascada | Completada: F1 macro 0.9352, recall binario de fraude 100 %, 14.7 % escalado, kappa humano–LLM 0.875 (18/11/2026) |
-| 6 — Explicabilidad | Completada: semáforo 0–100, hasta 5 señales con offsets, resumen de 3 frases, catálogo cerrado por tipología y aviso orientativo en todos los caminos; 171 pruebas (18/11/2026) |
-| 7 — Interfaz web | Completada: API FastAPI, flujo de 4 pasos, límites, WCAG verificada y contenedor `healthy`; 193 pruebas y E2E 20/20 (19/11/2026) |
-| 8 — Validación | Completada (20/11/2026): 207 pruebas pasadas, estrés, matriz de robustez, kappa Exp. A 0.925 y Exp. B 0.875, análisis de sesgos. Pendiente: aplicación del cuestionario SUS con 10–15 voluntarios reales (materiales listos en `docs/usabilidad_sus.md`). |
-| 9 — Documentación final | Pendiente |
+móvil.
 
 ## Estructura
 
 ```
-├── VerifIA_memoria_proyecto.md   # fuente de verdad del proyecto
 ├── Dockerfile / docker-compose.yml
 ├── .env.example                 # plantilla; el .env real no se versiona
-├── data/                        # corpus y capturas de prueba
-├── docs/                        # plan, instalación, skills por fase, guía de anotación, reportes
-├── notebooks/                   # exploración y entrenamiento
-├── scripts/                     # generación, depuración, partición, evaluación
-├── src/verifia/                 # sanitizer, ocr, classifier, explain, api
-├── tests/                       # pytest
+├── pyproject.toml               # configuración de pruebas
+├── requirements.txt             # dependencias de ejecución
+├── requirements-dev.txt         # dependencias de pruebas
+├── models/                      # modelo entrenado (nivel1.joblib)
+├── src/verifia/                 # código fuente: sanitizer, ocr, classifier, explain, api
+├── tests/                       # pruebas unitarias
 └── web/                         # HTML, CSS y JS estáticos (sin build)
 ```
 
