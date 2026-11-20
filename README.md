@@ -10,7 +10,7 @@ riesgo, la tipología probable, las señales de alerta y acciones seguras recome
 - **Alcance:** prototipo local en `http://localhost:8000`; no es un servicio público
 
 <div align="center">
-  <img src="docs/reportes/figuras/Demostracion.png" alt="Demostración de VerifIA — interfaz web de 4 pasos" width="750">
+  <img src="docs/reportes/figuras/Demostracion.png" alt="Demostración de VerifIA — interfaz web de 4 pasos" width="600">
 </div>
 
 ## Cómo funciona
