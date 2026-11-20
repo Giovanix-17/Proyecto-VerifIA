@@ -34,3 +34,7 @@ data/splits/sanitizado/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# --- Documentación final local (no se sube al repositorio) ---
+*.docx
+VerifIA_Proyecto.docx
