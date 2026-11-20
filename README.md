@@ -27,13 +27,55 @@ resultante viaja a la API.
 
 ## Inicio rápido
 
+### 1. Configurar variables de entorno
+
 ```powershell
-Copy-Item .env.example .env    # y rellena NVIDIA_API_KEY
+Copy-Item .env.example .env
+```
+
+Abre `.env` y rellena `NVIDIA_API_KEY` con tu clave de [build.nvidia.com](https://build.nvidia.com) (formato `nvapi-...`). El resto de variables tienen valores por defecto.
+
+### 2. Levantar el contenedor
+
+```powershell
 docker compose up --build -d
+```
+
+Esto inicia la API FastAPI con Uvicorn y sirve la interfaz web estática.
+
+### 3. Verificar que está funcionando
+
+```powershell
 Invoke-RestMethod http://localhost:8000/health
 ```
 
-La API responde en `http://localhost:8000`.
+Respuesta esperada: `{"status":"ok","version":"0.1.0"}`.
+
+### 4. Abrir la interfaz
+
+En tu navegador ve a:
+
+```
+http://localhost:8000
+```
+
+Verás el flujo de 4 pasos: pegar mensaje o subir captura, revisar texto extraído, analizar y ver el semáforo de riesgo.
+
+### 5. Detener el contenedor
+
+```powershell
+docker compose down
+```
+
+### Ejecución sin Docker (opcional)
+
+Si prefieres no usar Docker, instala las dependencias y ejecuta la API directamente:
+
+```powershell
+pip install -r requirements.txt
+$env:PYTHONPATH = "src"
+uvicorn verifia.api.main:app --reload --port 8000
+```
 
 ## Estructura
 
