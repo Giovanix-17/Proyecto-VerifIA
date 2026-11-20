@@ -9,7 +9,9 @@ riesgo, la tipología probable, las señales de alerta y acciones seguras recome
 - **Autor:** Giovani Hernández Arias
 - **Alcance:** prototipo local en `http://localhost:8000`; no es un servicio público
 
-![Demostración de VerifIA — interfaz web de 4 pasos](docs/reportes/figuras/Demostracion.png)
+<div align="center">
+  <img src="docs/reportes/figuras/Demostracion.png" alt="Demostración de VerifIA — interfaz web de 4 pasos" width="750">
+</div>
 
 ## Cómo funciona
 
