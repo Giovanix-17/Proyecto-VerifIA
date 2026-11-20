@@ -39,7 +39,11 @@ Documentación del proyecto: [plan de trabajo](docs/plan_trabajo.md) ·
 [métricas del clasificador](docs/reportes/metricas_clasificador.md) ·
 [explicabilidad](docs/reportes/explicabilidad.md) ·
 [interfaz web](docs/reportes/interfaz_web.md) ·
-[verificación de API](docs/reportes/verificacion_api.md).
+[verificación de API](docs/reportes/verificacion_api.md) ·
+[reporte de validación (Fase 8)](docs/reportes/reporte_validacion.md) ·
+[análisis de sesgos (Fase 8)](docs/reportes/analisis_sesgos.md) ·
+[protocolo de usabilidad SUS (Fase 8)](docs/usabilidad_sus.md) ·
+[acta de cierre Fase 8](docs/reportes/fase8_cierre.md).
 
 ## Corpus (Fase 2)
 
@@ -235,7 +239,7 @@ móvil. Detalle, tablas de contraste y limitaciones en el
 | 5 — Clasificador en cascada | Completada: F1 macro 0.9352, recall binario de fraude 100 %, 14.7 % escalado, kappa humano–LLM 0.875 (18/11/2026) |
 | 6 — Explicabilidad | Completada: semáforo 0–100, hasta 5 señales con offsets, resumen de 3 frases, catálogo cerrado por tipología y aviso orientativo en todos los caminos; 171 pruebas (18/11/2026) |
 | 7 — Interfaz web | Completada: API FastAPI, flujo de 4 pasos, límites, WCAG verificada y contenedor `healthy`; 193 pruebas y E2E 20/20 (19/11/2026) |
-| 8 — Validación | Pendiente |
+| 8 — Validación | Completada (20/11/2026): 207 pruebas pasadas, estrés, matriz de robustez, kappa Exp. A 0.925 y Exp. B 0.875, análisis de sesgos. Pendiente: aplicación del cuestionario SUS con 10–15 voluntarios reales (materiales listos en `docs/usabilidad_sus.md`). |
 | 9 — Documentación final | Pendiente |
 
 ## Estructura

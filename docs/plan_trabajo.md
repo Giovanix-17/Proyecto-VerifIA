@@ -13,7 +13,7 @@ Documento de planeación de la Fase 1 (Actividad 1). Fuente de verdad:
 | Institución | Universidad Tecnológica de Tabasco — DATIC |
 | Periodo referencial | 29/09/2026 – 28/12/2026 |
 | Versión de este plan | 1.3 (19/11/2026) |
-| Estado | Aprobado; Fases 1–7 completadas (19/11/2026) |
+| Estado | Aprobado; Fases 1–8 completadas (20/11/2026). Salvedad: cuestionario SUS listo para aplicación humana en Fase 9. |
 
 ---
 
@@ -234,3 +234,4 @@ habilita el inicio de la Fase 2.
 | 1.1 | 16/11/2026 | Estado de aprobación explícito; recursos y versiones ajustados tras verificar el contenedor. |
 | 1.2 | 16/11/2026 | Aprobación del plan registrada; Fase 1 cerrada. |
 | 1.3 | 19/11/2026 | Fase 7 cerrada: API, interfaz de 4 pasos, Docker, límites y verificación WCAG; estado actualizado a Fases 1–7. |
+| 1.4 | 20/11/2026 | Fase 8 cerrada: pruebas unitarias/integración (207 pasadas), estrés, matriz de robustez, kappa Experimento A (0.925) y B (0.875), análisis de sesgos, reporte de validación; SUS listo para aplicación humana. Estado actualizado a Fases 1–8. |

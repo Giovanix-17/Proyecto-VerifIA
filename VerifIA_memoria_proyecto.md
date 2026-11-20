@@ -461,9 +461,8 @@ Cada fase corresponde a una actividad de la propuesta y a un objetivo específic
 - Documentación técnica: arquitectura, esquemas de datos, entrenamiento y métricas.
 - Manual breve de uso; instrucciones de instalación y despliegue; registro de decisiones, limitaciones y lecciones aprendidas.
 - Reporte técnico conforme a lineamientos institucionales, con la cita de la ley de datos personales **unificada** (ver §15).
-- **Entregable:** documento final del proyecto VerifIA.
-
----
+- **Entregable:** documento(word) final del proyecto VerifIA.
+-
 
 ## 10. Cronograma (referencial: 29/09/2026 – 28/12/2026)
 
