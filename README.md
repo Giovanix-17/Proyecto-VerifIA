@@ -38,6 +38,7 @@ Documentación del proyecto: [plan de trabajo](docs/plan_trabajo.md) ·
 [OCR: CER/WER](docs/reportes/ocr_cer_wer.md) ·
 [métricas del clasificador](docs/reportes/metricas_clasificador.md) ·
 [explicabilidad](docs/reportes/explicabilidad.md) ·
+[interfaz web](docs/reportes/interfaz_web.md) ·
 [verificación de API](docs/reportes/verificacion_api.md).
 
 ## Corpus (Fase 2)
@@ -189,6 +190,40 @@ El módulo no reclasifica ni recalcula la puntuación: solo explica lo que ya
 decidió la cascada. Detalle, contrato de salida y limitaciones en el
 [reporte de explicabilidad](docs/reportes/explicabilidad.md).
 
+## Interfaz web (Fase 7)
+
+La interfaz estática se sirve desde el mismo FastAPI, sin framework ni paso de
+build, en `http://localhost:8000`. El flujo visible tiene cuatro pasos:
+
+1. Pegar el mensaje o subir una captura PNG/JPEG.
+2. Revisar y corregir el texto extraído por OCR.
+3. Analizar (estado de espera con el botón deshabilitado).
+4. Ver el semáforo, las señales resaltadas y las recomendaciones.
+
+| Endpoint | Uso |
+|---|---|
+| `GET /health` | Comprobación de vida (`{"status":"ok","version":"0.1.0"}`) |
+| `POST /api/analizar/texto` | Analiza un texto de hasta 10 000 caracteres |
+| `POST /api/analizar/imagen` | Extrae el texto de una captura (≤ 5 MB, ≤ 4000 px, ≤ 12 MP) |
+| `GET /` | Interfaz de 4 pasos |
+
+Límites: texto de 10 000 caracteres, imagen de 5 MB / 4000 px / 12 MP y
+10 solicitudes por IP cada 60 s (configurable con `RATE_LIMIT_MAX` y
+`RATE_LIMIT_VENTANA_S`). Los errores siempre son JSON con `detail` y `codigo`.
+La imagen nunca se envía al LLM; solo el texto ya sanitizado puede consultarse
+al servicio externo. No hay base de datos, caché ni logs de contenido, y el
+contenedor corre en modo de solo lectura.
+
+```powershell
+# Con el contenedor levantado:
+.\.venv\Scripts\python.exe scripts\e2e_interfaz.py
+```
+
+El E2E de Playwright recorre texto e imagen, comprueba el foco, los errores
+anunciados, el veredicto no cromático y la ausencia de scroll horizontal en
+móvil. Detalle, tablas de contraste y limitaciones en el
+[reporte de interfaz](docs/reportes/interfaz_web.md).
+
 ## Estado del proyecto
 
 | Fase | Estado |
@@ -199,7 +234,7 @@ decidió la cascada. Detalle, contrato de salida y limitaciones en el
 | 4 — OCR | Completada: pipeline PNG/JPEG con Tesseract `spa`, límites, preprocesamiento y 60 capturas sintéticas con CER 0.14 % (17/11/2026) |
 | 5 — Clasificador en cascada | Completada: F1 macro 0.9352, recall binario de fraude 100 %, 14.7 % escalado, kappa humano–LLM 0.875 (18/11/2026) |
 | 6 — Explicabilidad | Completada: semáforo 0–100, hasta 5 señales con offsets, resumen de 3 frases, catálogo cerrado por tipología y aviso orientativo en todos los caminos; 171 pruebas (18/11/2026) |
-| 7 — Interfaz web | Pendiente |
+| 7 — Interfaz web | Completada: API FastAPI, flujo de 4 pasos, límites, WCAG verificada y contenedor `healthy`; 193 pruebas y E2E 20/20 (19/11/2026) |
 | 8 — Validación | Pendiente |
 | 9 — Documentación final | Pendiente |
 

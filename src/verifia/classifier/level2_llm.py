@@ -149,6 +149,19 @@ def _cliente() -> Any:
     return OpenAI(api_key=api_key, base_url=base_url, timeout=timeout, max_retries=0)
 
 
+def cliente_si_hay_clave() -> Any | None:
+    """Cliente del LLM si hay ``NVIDIA_API_KEY``; ``None`` si no (regla 8).
+
+    La API usa este envoltorio para construir el estado del servicio: sin
+    clave, la cascada recibe ``cliente=None`` y toda la zona gris se resuelve
+    con el Nivel 1 + aviso de *análisis parcial*, en lugar de fallar.
+    """
+    try:
+        return _cliente()
+    except FalloLLM:
+        return None
+
+
 class FalloLLM(RuntimeError):
     """Fallo del Nivel 2 con motivo de la taxonomía del skill.
 

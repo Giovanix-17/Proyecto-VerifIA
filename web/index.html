@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f1f4f6">
+  <title>VerifIA · Verifica un mensaje sospechoso</title>
+  <meta name="description" content="Herramienta orientativa para revisar mensajes de posible fraude o extorsión en español. Tus datos se enmascaran y no se guardan.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='13' font-size='13'%3E%E2%9B%BE%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/estilos.css">
+</head>
+<body>
+  <a class="salto" href="#contenido">Saltar al contenido</a>
+
+  <header class="cabecera">
+    <p class="marca">VerifIA</p>
+  </header>
+
+  <main id="contenido" class="lienzo">
+    <section class="intro">
+      <h1>¿Recibiste un mensaje sospechoso?</h1>
+      <p class="intro-sub">Verifícalo aquí antes de responder. Tus datos se enmascaran antes de cualquier análisis y no se guardan; el resultado es orientativo.</p>
+    </section>
+
+    <ol class="pasos" aria-label="Progreso del análisis">
+      <li class="paso es-actual" data-paso="1" aria-current="step">
+        <span class="paso-num" aria-hidden="true">1</span><span class="paso-nombre">Mensaje</span>
+      </li>
+      <li class="paso" data-paso="2">
+        <span class="paso-num" aria-hidden="true">2</span><span class="paso-nombre">Revisar</span>
+      </li>
+      <li class="paso" data-paso="3">
+        <span class="paso-num" aria-hidden="true">3</span><span class="paso-nombre">Analizar</span>
+      </li>
+      <li class="paso" data-paso="4">
+        <span class="paso-num" aria-hidden="true">4</span><span class="paso-nombre">Resultado</span>
+      </li>
+    </ol>
+
+    <div id="avisos" class="avisos" role="alert" aria-live="assertive" hidden></div>
+
+    <!-- Paso 1: entrada -->
+    <section id="paso-1" class="panel" aria-label="Paso 1: ingresa el mensaje">
+      <fieldset class="modo">
+        <legend>¿Cómo quieres verificar tu mensaje?</legend>
+        <div class="modo-opciones">
+          <label class="modo-opcion">
+            <input type="radio" name="modo" value="texto" checked>
+            <span>Pegar texto</span>
+          </label>
+          <label class="modo-opcion">
+            <input type="radio" name="modo" value="imagen">
+            <span>Subir captura</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <div id="panel-texto">
+        <label for="mensaje">Pega aquí el mensaje que recibiste</label>
+        <textarea id="mensaje" name="mensaje" rows="7" maxlength="10000"
+          autocomplete="off" aria-describedby="contador"
+          placeholder="Ejemplo: Su cuenta será bloqueada hoy. Confirme su código en…" spellcheck="false"></textarea>
+        <p class="contador"><span id="contador">0</span> / 10 000 caracteres</p>
+      </div>
+
+      <div id="panel-imagen" hidden>
+        <label for="captura">Captura de pantalla (PNG o JPEG, hasta 5 MB)</label>
+        <input type="file" id="captura" name="captura" accept="image/png,image/jpeg">
+        <p class="ayuda">Extraeremos el texto de tu captura y podrás corregirlo en el siguiente paso. La imagen no se guarda ni se envía a internet.</p>
+      </div>
+
+      <button id="boton-paso1" class="boton boton-primario" type="button">Analizar mensaje</button>
+
+      <aside class="privacidad">
+        <h2>Privacidad</h2>
+        <p>Antes de analizar, <strong>enmascaramos tus datos</strong>: teléfonos, correos, nombres y números se sustituyen por etiquetas como <code>[TELEFONO]</code>. <strong>No guardamos</strong> tu mensaje ni tu imagen. Si el caso es ambiguo, solo el texto ya enmascarado se consulta a un servicio externo de análisis; tu captura nunca sale de este equipo.</p>
+      </aside>
+    </section>
+
+    <!-- Paso 2: revisión del texto -->
+    <section id="paso-2" class="panel" hidden aria-label="Paso 2: revisa el texto">
+      <h2>Revisa el texto antes de analizarlo</h2>
+      <p id="paso2-explicacion">Si algo se leyó mal en tu captura, corrígelo aquí.</p>
+      <label for="texto-revision">Texto a analizar (editable)</label>
+      <textarea id="texto-revision" name="texto-revision" rows="9" maxlength="10000" autocomplete="off" spellcheck="false"></textarea>
+      <ul id="avisos-ocr" class="lista-simple" aria-live="polite" hidden></ul>
+      <div class="acciones-fila">
+        <button id="boton-analizar" class="boton boton-primario" type="button">Analizar este texto</button>
+        <button id="boton-volver" class="boton boton-secundario" type="button">Volver a empezar</button>
+      </div>
+    </section>
+
+    <!-- Paso 3: espera -->
+    <section id="paso-3" class="panel espera" hidden tabindex="-1" aria-label="Paso 3: analizando">
+      <p class="espera-icono" aria-hidden="true">◌</p>
+      <p class="espera-texto" aria-live="polite">Analizando tu mensaje…</p>
+      <p class="ayuda">Puede tardar unos segundos.</p>
+    </section>
+
+    <!-- Paso 4: resultado -->
+    <section id="paso-4" class="panel resultado" hidden tabindex="-1" aria-label="Paso 4: resultado" aria-live="polite">
+      <div id="veredicto" class="veredicto" tabindex="-1"></div>
+      <div id="resultado-detalle"></div>
+      <div class="acciones-fila">
+        <button id="boton-otro" class="boton boton-secundario" type="button">Analizar otro mensaje</button>
+      </div>
+    </section>
+
+    <p class="aviso-general">Esta herramienta es orientativa. No sustituye tu criterio ni una denuncia formal.</p>
+  </main>
+
+  <footer class="pie">
+    <p>VerifIA · prototipo local · tus mensajes no se almacenan</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,18 +1,36 @@
+# VerifIA — contexto de build mínimo (Fase 7).
+# La imagen solo necesita: src/, web/, models/, requirements.txt y pyproject.toml.
+# Sin data/ ni entornos locales la imagen queda ligera y sin datos de usuario.
+
+# --- Git y entorno ---
 .git
 .gitignore
 .env
 .env.*
+!.env.example
 .venv
 venv
+
+# --- Python local ---
 __pycache__
+**/__pycache__
 *.py[cod]
 .pytest_cache
 .ruff_cache
 .mypy_cache
 .ipynb_checkpoints
+
+# --- Datos y experimentos (no hay nada que persistir: regla 2) ---
 data
 notebooks
+
+# --- Contenido que no viaja en la imagen ---
 docs
+scripts
 tests
-README.md
+.agents
+.vscode
+.idea
 *.md
+*.log
+*.tmp

@@ -85,6 +85,30 @@ Notas del diseño del contenedor:
 - El puerto se publica solo en `127.0.0.1`: no queda expuesto a la red local.
 - `.env` **no** se copia a la imagen; entra como variable de entorno al arrancar.
 
+### 6. Probar la interfaz y las pruebas automatizadas
+
+La interfaz está en `http://localhost:8000` y las pruebas de API no necesitan un
+servidor aparte:
+
+```powershell
+$env:PYTHONPATH = "src"
+pytest -q
+```
+
+El recorrido E2E usa Playwright en modo headless y requiere el contenedor
+encendido:
+
+```powershell
+pip install playwright
+python -m playwright install chromium
+python scripts/e2e_interfaz.py
+```
+
+Comprueba el flujo de 4 pasos con texto e imagen, el foco, los errores
+anunciados, el veredicto con icono + palabra y la ausencia de scroll horizontal
+en móvil. Deja capturas en `docs/reportes/figuras/`. Detalle en
+[`docs/reportes/interfaz_web.md`](reportes/interfaz_web.md).
+
 ---
 
 ## Alternativa: entorno virtual (sin Docker)
@@ -139,6 +163,9 @@ Notas del diseño del contenedor:
 | `LLM_RETRY_BASE_S` | Espera inicial entre reintentos (2, 4, 8 s) | `2` |
 | `LLM_REASONING_EFFORT` | Esfuerzo de razonamiento | `low` |
 | `NVIDIA_BASE_URL` | Endpoint compatible con OpenAI | `https://integrate.api.nvidia.com/v1` |
+| `UMBRAL_CONFIANZA` | Umbral de la cascada ajustado en validación | `0.75` |
+| `RATE_LIMIT_MAX` | Solicitudes permitidas por IP y ventana | `10` |
+| `RATE_LIMIT_VENTANA_S` | Tamaño de la ventana del límite, en segundos | `60` |
 
 ### Comprobar la clave sin mostrarla
 

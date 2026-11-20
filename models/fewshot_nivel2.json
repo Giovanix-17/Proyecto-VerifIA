@@ -1,0 +1,42 @@
+[
+  {
+    "texto": "Santander: Tu concierto de pagos de noviembre se procesó correctamente. Monto total $4,320.00. Consulta el detalle en la app.",
+    "tipologia": "legitimo"
+  },
+  {
+    "texto": "Scotiabank: Se detectó un inicio de sesión en tu banca en línea desde un dispositivo nuevo. Si fuiste tú, ignora este mensaje.",
+    "tipologia": "legitimo"
+  },
+  {
+    "texto": "¡Felicidades! Tienes 1500 puntos de canje en tu cuenta digital. Reclama ahora antes de que expiren. Link: [ENLACE:example.com]",
+    "tipologia": "suplantacion_bancaria"
+  },
+  {
+    "texto": "ALERTA: Detectamos inconsistencia en tus datos bancarios. Actualiza en [ENLACE:example.com] HOY para evitar suspensión. Urgente.",
+    "tipologia": "suplantacion_bancaria"
+  },
+  {
+    "texto": "ATENCION! Intento de entrega fallido en su dirección. Su pedido (Ref: GHI-001) REQUIERE actualización de datos por una inspeccion aduanal. Haz click AQUI para resolver antes de que expire el plazo.",
+    "tipologia": "paqueteria_retenida"
+  },
+  {
+    "texto": "Estimado cliente: Su pedido de Mercado Libre no pudo ser entregado en la dirección registrada. Por favor, contáctenos vía WhatsApp para reprogramar la entrega. No hay costos adicionales en este paso.",
+    "tipologia": "paqueteria_retenida"
+  },
+  {
+    "texto": "Hola. Somos de '[ENLACE:emprendetec.com]'. Puesto WFH medio tiempo. Te pagamos $7,500. Por favor, ingresa tus datos bancarios aquí: [ENLACE:example.com]. ¡Contratación ya!",
+    "tipologia": "oferta_laboral_fraudulenta"
+  },
+  {
+    "texto": "¡Trabaja desde casa! Contratación inmediata, sin entrevista. Envía tus datos personales para gestionar tu depósito de $7,500 MXN. Responde a este WhatsApp. 📱",
+    "tipologia": "oferta_laboral_fraudulenta"
+  },
+  {
+    "texto": "Si quieres saber de tu familiar, llama ahora a [TELEFONO]. No te demores, la situación es crítica. Cumple o habrá consecuencias.",
+    "tipologia": "extorsion"
+  },
+  {
+    "texto": "Tu deuda con el grupo es de $450. Haz transferencia YA a [ENLACE:pago-seguro-mx.com]. No hay prórroga. Es la única forma de evitar problemas mayores.",
+    "tipologia": "extorsion"
+  }
+]

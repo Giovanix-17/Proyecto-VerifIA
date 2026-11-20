@@ -208,3 +208,48 @@ class ResultadoClasificacion(Explicacion):
                 f"{self.puntuacion} (esperado: {esperado_estado!r})"
             )
         return self
+
+
+# --------------------------------------------------------------------------- #
+# Contratos HTTP de la API (Fase 7)
+# --------------------------------------------------------------------------- #
+class SolicitudTexto(BaseModel):
+    """Cuerpo de ``POST /api/analizar/texto`` (skill ``verifia-api-docker``)."""
+
+    texto: str = Field(
+        min_length=1,
+        max_length=10_000,
+        description="Mensaje que la persona quiere verificar (máximo 10 000 caracteres).",
+    )
+
+
+class RespuestaAnalisis(ResultadoClasificacion):
+    """Respuesta HTTP del análisis, con el texto ya enmascarado (Fase 7).
+
+    ``texto_analizado`` es el texto **sanitizado** sobre el que se calcularon
+    los offsets de las señales: la interfaz lo usa para resaltarlas sin volver
+    a buscarlas. Los datos personales ya son marcadores del catálogo (regla 3),
+    y la interfaz debe indicar que está enmascarado.
+    """
+
+    texto_analizado: str
+
+
+class RespuestaOCR(BaseModel):
+    """Texto extraído de una captura para revisión humana (Fase 4 → 7).
+
+    Corresponde al paso 2 del flujo: la persona corrige el borrador y **después**
+    llama a ``/api/analizar/texto`` con el texto corregido. El borrador puede
+    contener datos personales (proviene de la imagen de la propia persona); no
+    se guarda en ningún lugar (regla 2).
+    """
+
+    texto_extraido: str
+    confianza: float | None = Field(default=None, ge=0, le=100)
+    ancho: int = Field(ge=1)
+    alto: int = Field(ge=1)
+    advertencias: list[str] = Field(default_factory=list)
+    mensaje: str = Field(
+        default="Revisa y corrige el texto antes de analizarlo.",
+        max_length=200,
+    )

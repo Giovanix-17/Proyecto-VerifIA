@@ -30,7 +30,7 @@ corrige la skill, no la memoria.
 | **4** — OCR | `verifia-ocr` | `webapp-testing`, `scientific-visualization` + `matplotlib` | `src/verifia/ocr/` + reporte CER/WER | ≥ 50 capturas; **CER ≤ 15 %**; se avisa si la imagen es insuficiente |
 | **5** — Clasificador | `scikit-learn` | `verifia-nivel2-llm`, `statistical-analysis`, `scientific-visualization` + `matplotlib`, `shap` (opcional) | `classifier/` + `docs/reportes/metricas_clasificador.md` | F1 macro por clase; **recall ≥ 90 %** en fraude; 3 configuraciones comparadas |
 | **6** — Explicabilidad | `verifia-explicabilidad` | `shap` (opcional) | `src/verifia/explain/` | Semáforo, señales resaltadas, catálogo de recomendaciones y aviso orientativo |
-| **7** — Interfaz web | `verifia-api-docker` | `frontend-design`, `web-design-guidelines`, `webapp-testing` | `api/`, `web/`, Docker | `docker compose up` sirve el flujo de 4 pasos; límites y WCAG verificados |
+| **7** — Interfaz web | `verifia-api-docker` | `frontend-design`, `web-design-guidelines`, `webapp-testing` | `api/`, `web/`, Docker, `docs/reportes/interfaz_web.md` | `docker compose up` sirve el flujo de 4 pasos; límites y WCAG verificados |
 | **8** — Validación | `verifia-validacion` | `statistical-analysis`, `webapp-testing`, `scientific-visualization` + `matplotlib` | `docs/reportes/` | Pruebas técnicas, SUS, kappa humano–LLM y análisis de sesgos |
 | **9** — Documentación | `markdown-mermaid-writing` | `citation-management`, `scientific-visualization` | Documento final y manual de uso | Reporte académico con arquitectura, métricas, limitaciones y ley unificada |
 
@@ -58,7 +58,7 @@ corrige la skill, no la memoria.
 - [x] **Fase 4** — `verifia-ocr` + `webapp-testing` (capturas sintéticas) + `scientific-visualization` → validación PNG/JPEG, preprocesamiento OpenCV, Tesseract `spa`, posprocesamiento y 60 capturas sintéticas (claro/oscuro, 4 resoluciones, WhatsApp/SMS) con CER 0.14 % y WER 0.80 % (17/11/2026).
 - [x] **Fase 5** — `scikit-learn` + `verifia-nivel2-llm` + `statistical-analysis` → tres configuraciones comparadas en test (híbrido F1 macro 0.9352, recall binario de fraude 100 %, 14.7 % escalado), figuras y Experimento B del kappa (0.875; IC95 0.798–0.949) con 10 desacuerdos adjudicados (18/11/2026).
 - [x] **Fase 6** — `verifia-explicabilidad` → `src/verifia/explain/` con semáforo de tres estados derivado de la puntuación, hasta 5 señales resaltadas con offsets y origen, resumen determinista de tres frases, catálogo cerrado de recomendaciones por tipología y aviso orientativo en los tres caminos de la cascada; 15 snapshots y 171 pruebas en verde (18/11/2026).
-- [ ] **Fase 7** — `verifia-api-docker` + `frontend-design` + `web-design-guidelines` + `webapp-testing` → sistema integrado.
+- [x] **Fase 7** — `verifia-api-docker` + `frontend-design` + `web-design-guidelines` + `webapp-testing` → API FastAPI, flujo de 4 pasos en HTML/CSS/JS estático, límites de texto/imagen/frecuencia, accesibilidad y contenedor `healthy`; 193 pruebas y E2E 20/20 (19/11/2026).
 - [ ] **Fase 8** — `verifia-validacion` + `statistical-analysis` + `webapp-testing` → reporte de validación.
 - [ ] **Fase 9** — `markdown-mermaid-writing` + `citation-management` → documento final.
 
