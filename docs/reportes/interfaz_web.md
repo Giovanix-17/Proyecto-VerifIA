@@ -2,7 +2,8 @@
 
 > Backend `src/verifia/api/`, frontend estático `web/` y ejecución local con
 > `Dockerfile` + `docker-compose.yml`.
-> Fecha de cierre: 19/11/2026.
+> Fecha de cierre: 20/11/2026 (mejoras de interfaz: dropzone, medidor, historial,
+> copiar, tipografía Atkinson Hyperlegible local).
 
 ## 1. Resumen
 
@@ -10,7 +11,11 @@ La Fase 7 entrega el prototipo integrado de VerifIA en `http://localhost:8000`:
 
 - **API FastAPI** para analizar texto y extraer el texto de una captura.
 - **Flujo de 4 pasos** en HTML, CSS y JavaScript estáticos, sin framework ni
-  paso de build.
+  paso de build, con dropzone para capturas, botón visible "Elegir archivo",
+  vista previa, medidor de puntuación, botón "Copiar recomendaciones" y
+  historial del botón "Atrás".
+- **Tipografía Atkinson Hyperlegible** servida localmente (sin CDN).
+- **Voz "tú"** y recomendaciones impersonales en el catálogo.
 - **Límites** de texto, imagen y frecuencia aplicados en el servidor.
 - **Docker** como camino principal de ejecución, con usuario sin privilegios,
   sistema de archivos de solo lectura y sin volúmenes de datos.
@@ -31,6 +36,7 @@ automatizadas y E2E.
 | Límite de frecuencia en memoria | `src/verifia/api/limites.py` |
 | Contratos HTTP y de resultado | `src/verifia/schemas.py` |
 | Interfaz estática | `web/index.html`, `web/estilos.css`, `web/app.js` |
+| Tipografía local | `web/fuentes/AtkinsonHyperlegible-*.woff2`, `web/fuentes/OFL.txt` |
 | Bocetos de baja fidelidad | `docs/wireframes_interfaz.md` |
 | Imagen y orquestación | `Dockerfile`, `docker-compose.yml`, `.dockerignore` |
 | Pruebas de API | `tests/test_api.py` |
@@ -142,14 +148,32 @@ descarga modelos al arrancar. El healthcheck consulta `/health` cada 30 s.
 
 | Paso | Qué ve la persona | Implementación |
 |---|---|---|
-| 1. Entrada | Pegar texto o subir captura, con aviso de privacidad y contador | `#paso-1`, radio de modo, `textarea`, `input[type=file]` |
-| 2. Revisión | Texto editable; si vino de una captura, se corrige antes de analizar | `#paso-2`, `#texto-revision`, avisos del OCR |
-| 3. Análisis | Estado de espera con `aria-live`, botón deshabilitado | `#paso-3`, `aria-busy`, foco en el panel |
-| 4. Resultado | Semáforo con icono + palabra, tipología, puntuación, señales resaltadas, recomendaciones y aviso | `#paso-4`, `#veredicto`, `#resultado-detalle` |
+| 1. Entrada | Pegar texto o subir captura mediante dropzone con botón visible "Elegir archivo", vista previa, validación local y aviso de privacidad | `#paso-1`, `#zona-lanzamiento`, `#vista-previa`, `input[type=file] hidden`, botón "Elegir archivo" |
+| 2. Revisión | Texto editable; si vino de una captura, se corrige antes de analizar. Botón "Atrás" vuelve al paso 1 | `#paso-2`, `#texto-revision`, `#boton-atras-paso2`, avisos del OCR |
+| 3. Análisis | Estado de espera con `aria-live`, temporizador honesto, botón "Cancelar" (AbortController) | `#paso-3`, `aria-busy`, `#boton-cancelar`, `#espera-tiempo` |
+| 4. Resultado | Semáforo con icono + palabra, tipología, puntuación con medidor animado, señales resaltadas, recomendaciones, botón "Copiar recomendaciones", "Atrás", "Analizar otro mensaje" | `#paso-4`, `#veredicto`, `#medidor-veredicto`, `#boton-copiar`, `#boton-atras-paso4`, `#resultado-detalle` |
 
-La interfaz es mobile-first: una columna, base de 17 px, botones de 48 px y sin
-scroll horizontal a 390 px. El veredicto y la acción principal van primero; el
-detalle queda debajo.
+La interfaz es mobile-first: una columna, base de 17 px (16 px en móvil),
+botones de 48 px y sin scroll horizontal a 390 px. El veredicto y la acción
+principal van primero; el detalle queda debajo. La tipografía es Atkinson
+Hyperlegible, servida localmente desde `web/fuentes/` sin CDN.
+
+### 7.1 Voz y recomendaciones
+
+La interfaz usa segunda persona ("tú") de forma consistente. El catálogo de
+recomendaciones (`src/verifia/explain/catalogo.py`) está redactado de forma
+impersonal, sin inventar teléfonos, enlaces ni instituciones. El botón
+"Copiar recomendaciones" copia únicamente las recomendaciones del catálogo,
+nunca el mensaje analizado.
+
+### 7.2 Navegación e historial
+
+Cada paso del riel es un botón navegable. El botón "Atrás" del paso 2 vuelve
+al paso 1 y el del paso 4 vuelve al paso 2. El historial se mantiene en una
+pila interna sincronizada con `history.pushState` / `popstate`, de modo que el
+botón Atrás del navegador es coherente con el flujo. "Analizar otro mensaje"
+reinicia el flujo al paso 1.
+
 
 ## 8. Accesibilidad
 
@@ -194,8 +218,11 @@ palabra del estado y que la clase de color existe, pero no depende de ella.
 | Espera | `#paso-3[aria-live=polite]` |
 | Resultado | `#paso-4[aria-live=polite]` |
 | Avisos del OCR | `#avisos-ocr[aria-live=polite]` |
-| Campos | `<label for="…">` para mensaje, revisión y captura |
+| Campos | `<label for="…">` para mensaje (`#mensaje`), revisión (`#texto-revision`) y zona de lanzamiento (`#zona-lanzamiento`) |
 | Contador | `aria-describedby="contador"` |
+| Dropzone | `#zona-lanzamiento[role=region]`, `#vista-previa`, botón visible "Elegir archivo" |
+| Medidor | `#medidor-veredicto`, `#medidor-leyenda` |
+| Historial | `#boton-atras-paso2`, `#boton-atras-paso4`, `#boton-copiar`, `#boton-cancelar` |
 
 La revisión con `web-design-guidelines` añadió además `theme-color`,
 `autocomplete="off"`, `touch-action: manipulation`, `text-wrap: balance`,
@@ -215,7 +242,7 @@ Resultado al cierre:
 
 | Comprobación | Resultado |
 |---|---|
-| `pytest` | **193 pruebas en verde** (22.8 s) |
+| `pytest` | **196 pruebas en verde** (20.7 s) |
 | `ruff check` | Sin errores |
 | Advertencias | 4 de `httpx2` por una API obsoleta de test; no afectan la aplicación |
 
@@ -230,9 +257,11 @@ Resultado al cierre:
 - entrega de CSS y JS estáticos.
 
 `tests/test_interfaz.py` cubre los invariantes estáticos de la interfaz:
-idioma, salto de contenido, etiquetas, regiones vivas, privacidad, aviso
-orientativo, ausencia de bloqueo del zoom, foco visible, movimiento reducido,
-objetivos táctiles y escape del contenido dinámico.
+idioma (`es-MX`), salto de contenido, etiquetas, regiones vivas, privacidad,
+aviso orientativo, ausencia de bloqueo del zoom, foco visible, movimiento
+reducido, objetivos táctiles, escape del contenido dinámico, dropzone con
+"Elegir archivo", medidor de puntuación, botones de historial y copiar, fuentes
+locales Atkinson Hyperlegible y ausencia de CDN.
 
 ### 9.2 E2E con Playwright
 
@@ -242,7 +271,7 @@ python -m playwright install chromium
 python scripts/e2e_interfaz.py
 ```
 
-Resultado: **20 comprobaciones en verde** contra el contenedor reconstruido.
+Resultado: **29 comprobaciones en verde** contra el contenedor reconstruido.
 
 | Caso | Resultado |
 |---|---|
@@ -251,9 +280,17 @@ Resultado: **20 comprobaciones en verde** contra el contenedor reconstruido.
 | Foco en el veredicto al terminar | ✅ |
 | Veredicto con palabra + icono + clase de color | ✅ |
 | Recomendaciones (≥ 3) y aviso orientativo | ✅ |
+| Medidor de puntuación presente | ✅ |
 | Señales resaltadas y texto enmascarado sin PII | ✅ |
 | Error anunciado con `role=alert` y foco en el campo | ✅ |
-| Flujo con imagen: OCR → revisión → veredicto | ✅ |
+| Primer elemento focusable: "Saltar al contenido" | ✅ |
+| Flujo con imagen: dropzone → "Elegir archivo" → OCR → revisión → veredicto | ✅ |
+| Vista previa de la captura tras seleccionar | ✅ |
+| Sin scroll horizontal tras la imagen | ✅ |
+| Cancelar análisis (AbortController) vuelve al paso 2 | ✅ |
+| Movimiento reducido: sin animación del icono de espera | ✅ |
+| Copiar recomendaciones (clic sin error) | ✅ |
+| Atrás desde resultado → paso 2; atrás desde paso 2 → paso 1 | ✅ |
 | Sin scroll horizontal en escritorio (1280 px) y móvil (390 px) | ✅ |
 | Botón principal ≥ 44 px y campo a todo el ancho | ✅ |
 
@@ -298,7 +335,7 @@ texto.
 | Criterio de la Fase 7 | Estado |
 |---|---|
 | `docker compose up` levanta el sistema y responde en `http://localhost:8000` | ✅ Contenedor `healthy` y `/health` en 200 |
-| Flujo de 4 pasos completo, texto e imagen | ✅ E2E 20/20 |
+| Flujo de 4 pasos completo, texto e imagen | ✅ E2E 29/29 |
 | Límites de texto, imagen y frecuencia aplicados y probados | ✅ Pruebas de API |
 | Aviso de privacidad y aviso orientativo visibles | ✅ Prueba estática y E2E |
 | Contraste, teclado y comunicación no cromática verificados | ✅ Ratios WCAG, E2E y revisión de guías web |

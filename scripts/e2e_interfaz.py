@@ -1,15 +1,20 @@
-"""Pruebas E2E de la interfaz con Playwright (Fase 7).
+"""Pruebas E2E de la interfaz con Playwright (Fase 7, mejoras).
 
 Ejercita el flujo de 4 pasos contra un servidor en marcha (por defecto
 ``http://127.0.0.1:8000``, el de Docker; acepta ``--base-url``). Deja
 capturas en ``docs/reportes/figuras/`` como evidencia para el reporte.
 
-Casos (skill ``verifia-api-docker`` §5):
+Casos:
 
 * flujo de 4 pasos con texto: entrada → revisión → análisis → veredicto;
-* flujo con imagen: OCR → revisión del texto extraído → veredicto;
+* flujo con imagen: dropzone → "Elegir archivo" → OCR → revisión → veredicto;
 * el veredicto se comunica con icono + palabra, no solo con color;
+* medidor de puntuación animado;
+* botón "Copiar recomendaciones";
+* botón "Atrás" e historial (Back del navegador);
+* cancelar análisis;
 * navegación por teclado y errores anunciados (``role="alert"``);
+* movimiento reducido (sin animaciones);
 * sin scroll horizontal en escritorio y en móvil (390 px).
 
 Uso::
@@ -142,8 +147,15 @@ def main() -> int:
             pagina.locator(".recomendaciones li").count() >= 3,
         )
         comprobar("aviso orientativo presente", pagina.locator(".aviso-final").is_visible())
+        # Medidor de puntuación (se revela desde JS tras pintar el veredicto).
+        pagina.wait_for_selector("#medidor-veredicto .meter-barra", state="attached", timeout=5_000)
+        comprobar(
+            "medidor de puntuación presente",
+            pagina.locator("#medidor-veredicto .meter-barra").count() == 1,
+        )
 
-        pagina.locator("details summary").click()
+        # Señales resaltadas sobre el texto enmascarado.
+        pagina.locator("#paso-4 details summary").click()
         marcadores = pagina.locator(".texto-analizado mark").count()
         texto_enmascarado = pagina.locator(".texto-analizado").inner_text()
         comprobar("señales resaltadas sobre el texto", marcadores >= 1)
@@ -153,18 +165,49 @@ def main() -> int:
         )
         pagina.locator("#paso-4").screenshot(path=str(FIGURAS / "e2e_paso4_resultado.png"))
 
-        comprobar("sin scroll horizontal (1280 px)", sin_scroll_horizontal(pagina))
+        # Copiar recomendaciones (el portapapeles puede no estar disponible en
+        # headless: solo verificamos que el clic no lance error).
+        pagina.wait_for_selector("#boton-copiar", state="visible", timeout=5_000)
+        pagina.click("#boton-copiar")
+        pagina.wait_for_timeout(600)
+        copiado = pagina.locator("#boton-copiar").inner_text()
+        comprobar(
+            "clic en copiar no lanza error",
+            copiado in ("Copiar recomendaciones", "Copiado"),
+            copiado,
+        )
+
+        # Atrás desde el resultado vuelve al paso 2.
+        pagina.click("#boton-atras-paso4")
+        pagina.wait_for_selector("#paso-2:not([hidden])", state="attached", timeout=5_000)
+        comprobar(
+            "atrás desde resultado vuelve al paso 2",
+            pagina.locator("#paso-2:not([hidden])").count() == 1,
+        )
+
+        # Atrás desde el paso 2 vuelve al paso 1.
+        pagina.click("#boton-atras-paso2")
+        pagina.wait_for_selector("#paso-1:not([hidden])", state="attached", timeout=5_000)
+        comprobar(
+            "atrás desde paso 2 vuelve al paso 1",
+            pagina.locator("#paso-1:not([hidden])").count() == 1,
+        )
+
         pagina.close()
 
         # ---------------- teclado y errores anunciados ----------------
         pagina = navegador.new_page(viewport={"width": 1280, "height": 900})
         pagina.goto(base, wait_until="networkidle")
-        pagina.keyboard.press("Tab")
-        primero = pagina.evaluate("document.activeElement?.textContent?.trim() || ''")
+        # El enlace "Saltar al contenido" debe ser el primer elemento enfocable.
+        primero_es_salto = pagina.evaluate(
+            "document.querySelector('.salto') === "
+            "document.querySelectorAll("
+            "'a, button, input, textarea, select, [tabindex]:not([tabindex=\"-1\"])')"
+            "[0]"
+        )
         comprobar(
-            "primer foco: enlace para saltar al contenido",
-            "Saltar al contenido" in primero,
-            primero,
+            "primer foco: enlace para saltar al contenido (primer focusable en el DOM)",
+            primero_es_salto,
         )
 
         pagina.focus("#boton-paso1")
@@ -181,12 +224,20 @@ def main() -> int:
         )
         pagina.close()
 
-        # ---------------- flujo con imagen ----------------
+        # ---------------- flujo con imagen (dropzone) ----------------
         pagina = navegador.new_page(viewport={"width": 1280, "height": 900})
         pagina.goto(base, wait_until="networkidle")
         # El radio es invisible (patrón accesible): se activa con su etiqueta.
         pagina.locator(".modo-opcion").filter(has_text="Subir captura").click()
+        # Abre el selector de archivo mediante el botón "Elegir archivo".
+        pagina.locator(".dropzone-boton").click()
         pagina.set_input_files("#captura", str(captura_png))
+        # Espera a que la vista previa aparezca (validación local async).
+        pagina.wait_for_selector("#vista-previa:not([hidden])", state="attached", timeout=10_000)
+        comprobar(
+            "vista previa de la captura mostrada",
+            pagina.locator("#vista-previa:not([hidden])").count() == 1,
+        )
         pagina.click("#boton-paso1")
         pagina.wait_for_selector("#paso-2:not([hidden])", state="attached", timeout=60_000)
         extraido = pagina.input_value("#texto-revision")
@@ -202,6 +253,36 @@ def main() -> int:
             any(v in pagina.locator("#veredicto").inner_text() for v in VEREDICTOS),
         )
         comprobar("sin scroll horizontal tras la imagen", sin_scroll_horizontal(pagina))
+        pagina.close()
+
+        # ---------------- cancelar análisis ----------------
+        pagina = navegador.new_page(viewport={"width": 1280, "height": 900})
+        pagina.goto(base, wait_until="networkidle")
+        pagina.fill("#mensaje", TEXTO_FRAUDE)
+        pagina.click("#boton-paso1")
+        pagina.wait_for_selector("#paso-2:not([hidden])", state="attached", timeout=10_000)
+        pagina.click("#boton-analizar")
+        pagina.wait_for_selector("#paso-3:not([hidden])", state="attached", timeout=5_000)
+        pagina.click("#boton-cancelar")
+        pagina.wait_for_selector("#paso-2:not([hidden])", state="attached", timeout=5_000)
+        comprobar("cancelar vuelve al paso 2", pagina.locator("#paso-2:not([hidden])").count() == 1)
+        pagina.close()
+
+        # ---------------- movimiento reducido ----------------
+        pagina = navegador.new_page(viewport={"width": 1280, "height": 900})
+        pagina.goto(base, wait_until="networkidle")
+        # Simula prefers-reduced-motion mediante el emulador de medios de Playwright.
+        pagina.emulate_media(color_scheme="light", reduced_motion="reduce")
+        pagina.fill("#mensaje", "Hola, esto es una prueba de movimiento reducido.")
+        pagina.click("#boton-paso1")
+        pagina.wait_for_selector("#paso-2:not([hidden])", state="attached", timeout=10_000)
+        pagina.click("#boton-analizar")
+        pagina.wait_for_selector("#paso-3:not([hidden])", state="attached", timeout=5_000)
+        girando = pagina.evaluate(
+            "getComputedStyle(document.querySelector('.espera-icono')).animationName"
+        )
+        comprobar("movimiento reducido: sin animación del icono", girando == "none", girando)
+        pagina.click("#boton-cancelar")
         pagina.close()
 
         # ---------------- móvil (390 px) ----------------

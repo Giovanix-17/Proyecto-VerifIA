@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es-MX">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,9 +8,19 @@
   <title>VerifIA · Verifica un mensaje sospechoso</title>
   <meta name="description" content="Herramienta orientativa para revisar mensajes de posible fraude o extorsión en español. Tus datos se enmascaran y no se guardan.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='13' font-size='13'%3E%E2%9B%BE%3C/text%3E%3C/svg%3E">
+  <link rel="preload" href="/static/fuentes/AtkinsonHyperlegible-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/static/fuentes/AtkinsonHyperlegible-Bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/static/fuentes/AtkinsonHyperlegible-LatinExt-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/static/fuentes/AtkinsonHyperlegible-LatinExt-Bold.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/static/estilos.css">
 </head>
 <body>
+  <noscript>
+    <div class="panel avisos" role="alert" aria-live="assertive">
+      <p><strong>JavaScript es necesario.</strong> Actívalo para usar VerifIA. El análisis ocurre localmente y no se envía nada a servidores externos salvo el texto ya enmascarado.</p>
+    </div>
+  </noscript>
+
   <a class="salto" href="#contenido">Saltar al contenido</a>
 
   <header class="cabecera">
@@ -24,17 +34,17 @@
     </section>
 
     <ol class="pasos" aria-label="Progreso del análisis">
-      <li class="paso es-actual" data-paso="1" aria-current="step">
-        <span class="paso-num" aria-hidden="true">1</span><span class="paso-nombre">Mensaje</span>
+      <li class="paso es-actual" data-paso="1" aria-current="step" role="button" tabindex="0">
+        <span class="paso-num" aria-hidden="true">1</span><span class="paso-nombre">Mensaje</span><span class="paso-estado" aria-hidden="true"></span>
       </li>
-      <li class="paso" data-paso="2">
-        <span class="paso-num" aria-hidden="true">2</span><span class="paso-nombre">Revisar</span>
+      <li class="paso" data-paso="2" role="button" tabindex="0">
+        <span class="paso-num" aria-hidden="true">2</span><span class="paso-nombre">Revisar</span><span class="paso-estado" aria-hidden="true"></span>
       </li>
-      <li class="paso" data-paso="3">
-        <span class="paso-num" aria-hidden="true">3</span><span class="paso-nombre">Analizar</span>
+      <li class="paso" data-paso="3" role="button" tabindex="0">
+        <span class="paso-num" aria-hidden="true">3</span><span class="paso-nombre">Analizar</span><span class="paso-estado" aria-hidden="true"></span>
       </li>
-      <li class="paso" data-paso="4">
-        <span class="paso-num" aria-hidden="true">4</span><span class="paso-nombre">Resultado</span>
+      <li class="paso" data-paso="4" role="button" tabindex="0">
+        <span class="paso-num" aria-hidden="true">4</span><span class="paso-nombre">Resultado</span><span class="paso-estado" aria-hidden="true"></span>
       </li>
     </ol>
 
@@ -65,9 +75,22 @@
       </div>
 
       <div id="panel-imagen" hidden>
-        <label for="captura">Captura de pantalla (PNG o JPEG, hasta 5 MB)</label>
-        <input type="file" id="captura" name="captura" accept="image/png,image/jpeg">
-        <p class="ayuda">Extraeremos el texto de tu captura y podrás corregirlo en el siguiente paso. La imagen no se guarda ni se envía a internet.</p>
+        <label for="zona-lanzamiento">Captura de pantalla (PNG o JPEG, hasta 5 MB)</label>
+        <div class="dropzone" id="zona-lanzamiento" role="region" aria-label="Zona para soltar o seleccionar una captura">
+          <input type="file" id="captura" name="captura" accept="image/png,image/jpeg" hidden aria-label="Seleccionar captura">
+          <div class="dropzone-contenido">
+            <span class="dropzone-icon" aria-hidden="true">&#128247;</span>
+            <p class="dropzone-titulo">Suelta tu captura aquí</p>
+            <p class="dropzone-sub">o <button type="button" class="dropzone-boton">Elegir archivo</button></p>
+            <p class="dropzone-ayuda">PNG o JPEG, hasta 5 MB. La imagen no se guarda ni se envía a internet.</p>
+          </div>
+          <div id="vista-previa" class="vista-previa" hidden aria-label="Vista previa de la captura seleccionada">
+            <button type="button" class="quitar-vista" id="quitar-vista" aria-label="Quitar la captura seleccionada">&#215;</button>
+            <img id="imagen-vista-previa" src="" alt="Vista previa de tu captura">
+            <p id="nombre-archivo" class="nombre-archivo"></p>
+          </div>
+          <p id="error-dropzone" class="error-inline" hidden></p>
+        </div>
       </div>
 
       <button id="boton-paso1" class="boton boton-primario" type="button">Analizar mensaje</button>
@@ -86,8 +109,8 @@
       <textarea id="texto-revision" name="texto-revision" rows="9" maxlength="10000" autocomplete="off" spellcheck="false"></textarea>
       <ul id="avisos-ocr" class="lista-simple" aria-live="polite" hidden></ul>
       <div class="acciones-fila">
+        <button id="boton-atras-paso2" class="boton boton-secundario" type="button">Atrás</button>
         <button id="boton-analizar" class="boton boton-primario" type="button">Analizar este texto</button>
-        <button id="boton-volver" class="boton boton-secundario" type="button">Volver a empezar</button>
       </div>
     </section>
 
@@ -95,15 +118,26 @@
     <section id="paso-3" class="panel espera" hidden tabindex="-1" aria-label="Paso 3: analizando">
       <p class="espera-icono" aria-hidden="true">◌</p>
       <p class="espera-texto" aria-live="polite">Analizando tu mensaje…</p>
-      <p class="ayuda">Puede tardar unos segundos.</p>
+      <p class="espera-tiempo" aria-live="off"></p>
+      <button id="boton-cancelar" class="boton boton-secundario" type="button">Cancelar</button>
     </section>
 
     <!-- Paso 4: resultado -->
     <section id="paso-4" class="panel resultado" hidden tabindex="-1" aria-label="Paso 4: resultado" aria-live="polite">
       <div id="veredicto" class="veredicto" tabindex="-1"></div>
+      <div id="medidor-veredicto" class="meter" hidden>
+        <div class="meter-barra" style="width: 0%;"></div>
+      </div>
+      <div id="medidor-leyenda" class="meter-leyenda" hidden>
+        <span>Riesgo bajo</span>
+        <span>Riesgo medio</span>
+        <span>Riesgo alto</span>
+      </div>
       <div id="resultado-detalle"></div>
       <div class="acciones-fila">
-        <button id="boton-otro" class="boton boton-secundario" type="button">Analizar otro mensaje</button>
+        <button id="boton-atras-paso4" class="boton boton-secundario" type="button">Atrás</button>
+        <button id="boton-copiar" class="boton boton-secundario" type="button">Copiar recomendaciones</button>
+        <button id="boton-otro" class="boton boton-primario" type="button">Analizar otro mensaje</button>
       </div>
     </section>
 

@@ -1,4 +1,4 @@
-/* VerifIA — lógica de la interfaz (Fase 7).
+/* VerifIA — lógica de la interfaz (Fase 7, mejoras).
    Flujo de 4 pasos: entrada → revisión → análisis → resultado.
    Sin frameworks: fetch + manipulación del DOM. */
 
@@ -6,6 +6,8 @@
   "use strict";
 
   const MAXIMO_TEXTO = 10000;
+  const LIMITE_IMAGEN_BYTES = 5 * 1024 * 1024;
+  const LADO_MAXIMO = 4000;
 
   const NOMBRES_TIPOLOGIA = {
     legitimo: "Mensaje legítimo",
@@ -15,7 +17,6 @@
     extorsion: "Probable extorsión",
   };
 
-  /* códigos estables de la API → frases para la persona usuaria */
   const MENSAJES_ERROR = {
     texto_vacio: "Escribe el mensaje que quieres verificar.",
     texto_muy_largo: "El mensaje es demasiado largo (máximo 10 000 caracteres).",
@@ -50,19 +51,42 @@
       4: $("#paso-4"),
     },
     modoTexto: document.querySelector('input[name="modo"][value="texto"]'),
+    modoImagen: document.querySelector('input[name="modo"][value="imagen"]'),
     mensaje: $("#mensaje"),
     contador: $("#contador"),
     captura: $("#captura"),
+    zonaLanzamiento: $("#zona-lanzamiento"),
+    botonElegirArchivo: $("#zona-lanzamiento .dropzone-boton"),
+    vistaPrevia: $("#vista-previa"),
+    imagenVistaPrevia: $("#imagen-vista-previa"),
+    nombreArchivo: $("#nombre-archivo"),
+    quitarVista: $("#quitar-vista"),
+    errorDropzone: $("#error-dropzone"),
     botonPaso1: $("#boton-paso1"),
     explicacionPaso2: $("#paso2-explicacion"),
     revision: $("#texto-revision"),
     avisosOCR: $("#avisos-ocr"),
     botonAnalizar: $("#boton-analizar"),
-    botonVolver: $("#boton-volver"),
+    botonVolverPaso2: $("#boton-atras-paso2"),
     veredicto: $("#veredicto"),
     detalle: $("#resultado-detalle"),
+    botonAtrasPaso4: $("#boton-atras-paso4"),
+    botonCopiar: $("#boton-copiar"),
     botonOtro: $("#boton-otro"),
+    esperaTexto: $(".espera-texto"),
+    esperaTiempo: $(".espera-tiempo"),
+    botonCancelar: $("#boton-cancelar"),
+    paso2: $("#paso-2"),
+    paso4: $("#paso-4"),
   };
+
+  /* ---------------- estado ---------------- */
+
+  let archivoSeleccionado = null;
+  let controladorAborto = null;
+  let inicioEspera = null;
+  let temporizador = null;
+  let historialPasos = [1]; /* pila para el botón Atrás */
 
   /* ---------------- utilidades ---------------- */
 
@@ -96,16 +120,79 @@
     return cuerpo;
   }
 
-  /* ---------------- navegación por pasos ---------------- */
+  function mostrarToast(texto) {
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.textContent = texto;
+    document.body.appendChild(toast);
+    /* fuerza reflow para que la transición de opacidad funcione */
+    toast.offsetHeight;
+    toast.classList.add("visible");
+    setTimeout(() => {
+      toast.classList.remove("visible");
+      setTimeout(() => toast.remove(), 220);
+    }, 1800);
+  }
 
-  function irAPaso(numero) {
+  /* ---------------- historial y navegación ------------ */
+
+  function entrarHistorial(numero) {
+    historialPasos.push(numero);
+    history.pushState({ paso: numero }, "", `#paso-${numero}`);
+    actualizarRiel(numero);
+  }
+
+  function manejarRetroceso() {
+    if (historialPasos.length <= 1) return;
+    historialPasos.pop();
+    const anterior = historialPasos[historialPasos.length - 1];
+    irAPaso(anterior, { historial: false });
+  }
+
+  function irAPaso(numero, { historial = true } = {}) {
+    if (historial) entrarHistorial(numero);
+
     for (const [clave, seccion] of Object.entries(ui.secciones)) {
       seccion.hidden = Number(clave) !== numero;
     }
     ui.pasos.forEach((paso) => {
       const valor = Number(paso.dataset.paso);
+      const actual = valor === numero;
+      const hecho = valor < numero;
+      paso.classList.toggle("es-actual", actual);
+      paso.classList.toggle("hecho", hecho);
+      paso.classList.toggle("nohabilitado", valor > numero);
+      if (actual) {
+        paso.setAttribute("aria-current", "step");
+        paso.tabIndex = 0;
+      } else {
+        paso.removeAttribute("aria-current");
+        paso.tabIndex = -1;
+      }
+    });
+
+    if (historial) {
+      history.replaceState({ paso: numero }, "", `#paso-${numero}`);
+    }
+
+    /* foco según el paso */
+    if (numero === 1) {
+      ui.mensaje.focus();
+    } else if (numero === 2) {
+      ui.revision.focus();
+    } else if (numero === 3) {
+      ui.secciones[3].focus();
+    } else if (numero === 4) {
+      ui.veredicto.focus();
+    }
+  }
+
+  function actualizarRiel(numero) {
+    ui.pasos.forEach((paso) => {
+      const valor = Number(paso.dataset.paso);
       paso.classList.toggle("es-actual", valor === numero);
       paso.classList.toggle("hecho", valor < numero);
+      paso.classList.toggle("nohabilitado", valor > numero);
       if (valor === numero) {
         paso.setAttribute("aria-current", "step");
       } else {
@@ -124,6 +211,16 @@
     ui.avisos.textContent = "";
   }
 
+  function mostrarErrorDropzone(texto) {
+    ui.errorDropzone.textContent = texto;
+    ui.errorDropzone.hidden = false;
+  }
+
+  function limpiarErrorDropzone() {
+    ui.errorDropzone.hidden = true;
+    ui.errorDropzone.textContent = "";
+  }
+
   /* ---------------- paso 1: entrada ---------------- */
 
   function modoActual() {
@@ -138,6 +235,88 @@
     const esTexto = modoActual() === "texto";
     $("#panel-texto").hidden = !esTexto;
     $("#panel-imagen").hidden = esTexto;
+    limpiarAviso();
+    limpiarErrorDropzone();
+  }
+
+  function leerArchivoComoURL(archivo) {
+    return new Promise((resolve, reject) => {
+      const lector = new FileReader();
+      lector.onload = () => resolve(lector.result);
+      lector.onerror = () => reject(lector.error);
+      lector.readAsDataURL(archivo);
+    });
+  }
+
+  async function seleccionarArchivo(archivo) {
+    limpiarErrorDropzone();
+    if (
+      archivo.type !== "image/png" &&
+      archivo.type !== "image/jpeg"
+    ) {
+      mostrarErrorDropzone(mensajeDeError("formato_no_soportado"));
+      ui.captura.value = "";
+      archivoSeleccionado = null;
+      ui.vistaPrevia.hidden = true;
+      return;
+    }
+    if (archivo.size > LIMITE_IMAGEN_BYTES) {
+      mostrarErrorDropzone(mensajeDeError("imagen_demasiado_grande"));
+      ui.captura.value = "";
+      archivoSeleccionado = null;
+      ui.vistaPrevia.hidden = true;
+      return;
+    }
+
+    archivoSeleccionado = archivo;
+    ui.nombreArchivo.textContent = archivo.name;
+    try {
+      const url = await leerArchivoComoURL(archivo);
+      ui.imagenVistaPrevia.src = url;
+      ui.vistaPrevia.hidden = false;
+    } catch {
+      mostrarErrorDropzone(mensajeDeError("imagen_invalida"));
+      ui.captura.value = "";
+      archivoSeleccionado = null;
+      ui.vistaPrevia.hidden = true;
+    }
+  }
+
+  function quitarArchivo() {
+    archivoSeleccionado = null;
+    ui.captura.value = "";
+    ui.vistaPrevia.hidden = true;
+    ui.imagenVistaPrevia.src = "";
+    ui.nombreArchivo.textContent = "";
+    limpiarErrorDropzone();
+    ui.captura.focus();
+  }
+
+  async function validarImagenLocalmente(archivo) {
+    if (archivo.size > LIMITE_IMAGEN_BYTES) {
+      throw { codigo: "imagen_demasiado_grande" };
+    }
+    if (
+      archivo.type !== "image/png" &&
+      archivo.type !== "image/jpeg"
+    ) {
+      throw { codigo: "formato_no_soportado" };
+    }
+    /* valida dimensiones leyendo la imagen */
+    const url = await leerArchivoComoURL(archivo);
+    await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = url;
+    });
+    /* crear una imagen Offscreen para leer dimensiones reales */
+    const bitmap = await createImageBitmap(await fetch(url).then((r) => r.blob()));
+    if (bitmap.width > LADO_MAXIMO || bitmap.height > LADO_MAXIMO) {
+      bitmap.close();
+      throw { codigo: "imagen_demasiado_grande" };
+    }
+    bitmap.close();
   }
 
   async function enviarDesdePaso1() {
@@ -163,27 +342,31 @@
       return;
     }
 
-    const archivo = ui.captura.files?.[0];
-    if (!archivo) {
-      avisar(mensajeDeError("imagen_vacia"));
-      ui.captura.focus();
+    if (!archivoSeleccionado) {
+      mostrarErrorDropzone(mensajeDeError("imagen_vacia"));
+      ui.botonElegirArchivo.focus();
       return;
     }
-    if (archivo.type !== "image/png" && archivo.type !== "image/jpeg") {
-      avisar(mensajeDeError("formato_no_soportado"));
-      ui.captura.focus();
+
+    try {
+      await validarImagenLocalmente(archivoSeleccionado);
+    } catch (error) {
+      mostrarErrorDropzone(mensajeDeError(error.codigo));
+      ui.botonElegirArchivo.focus();
       return;
     }
 
     ui.botonPaso1.disabled = true;
     ui.botonPaso1.setAttribute("aria-busy", "true");
     ui.botonPaso1.textContent = "Extrayendo texto…";
+    controladorAborto = new AbortController();
     try {
       const datos = new FormData();
-      datos.append("imagen", archivo, archivo.name);
+      datos.append("imagen", archivoSeleccionado, archivoSeleccionado.name);
       const cuerpo = await llamarAPI("/api/analizar/imagen", {
         method: "POST",
         body: datos,
+        signal: controladorAborto.signal,
       });
       ui.explicacionPaso2.textContent =
         "Este texto salió de tu captura. Corrige lo que se haya leído mal.";
@@ -204,15 +387,36 @@
       irAPaso(2);
       ui.revision.focus();
     } catch (error) {
+      if (error.name === "AbortError") {
+        limpiarAviso();
+        return;
+      }
       avisar(mensajeDeError(error.codigo));
     } finally {
       ui.botonPaso1.disabled = false;
       ui.botonPaso1.removeAttribute("aria-busy");
       ui.botonPaso1.textContent = "Analizar mensaje";
+      controladorAborto = null;
     }
   }
 
   /* ---------------- paso 3 → 4: análisis y resultado ---------------- */
+
+  function iniciarTemporizador() {
+    inicioEspera = Date.now();
+    ui.esperaTiempo.textContent = "Tiempo transcurrido: 0 s";
+    clearInterval(temporizador);
+    temporizador = setInterval(() => {
+      const segundos = Math.floor((Date.now() - inicioEspera) / 1000);
+      ui.esperaTiempo.textContent = `Tiempo transcurrido: ${segundos} s`;
+    }, 1000);
+  }
+
+  function detenerTemporizador() {
+    clearInterval(temporizador);
+    temporizador = null;
+    ui.esperaTiempo.textContent = "";
+  }
 
   async function analizar() {
     limpiarAviso();
@@ -225,25 +429,33 @@
     ui.botonAnalizar.disabled = true;
     ui.botonAnalizar.setAttribute("aria-busy", "true");
     irAPaso(3);
-    ui.secciones[3].focus(); /* anuncia el estado de espera (aria-live) */
+    ui.secciones[3].focus();
+    iniciarTemporizador();
+    controladorAborto = new AbortController();
     try {
       const cuerpo = await llamarAPI("/api/analizar/texto", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ texto }),
+        signal: controladorAborto.signal,
       });
-      /* Primero se muestra el panel y luego se pinta: así la zona
-         aria-live anuncia el veredicto y el foco queda en él. */
+      detenerTemporizador();
       irAPaso(4);
       pintarResultado(cuerpo);
       ui.veredicto.focus();
     } catch (error) {
+      detenerTemporizador();
+      if (error.name === "AbortError") {
+        irAPaso(2);
+        return;
+      }
       avisar(mensajeDeError(error.codigo));
       irAPaso(2);
       ui.revision.focus();
     } finally {
       ui.botonAnalizar.disabled = false;
       ui.botonAnalizar.removeAttribute("aria-busy");
+      controladorAborto = null;
     }
   }
 
@@ -253,6 +465,12 @@
       amarillo: "veredicto--amarillo",
       rojo: "veredicto--rojo",
     };
+    const colorBarra =
+      r.estado === "rojo"
+        ? "var(--rojo-borde)"
+        : r.estado === "amarillo"
+          ? "var(--ambar-borde)"
+          : "var(--verde-borde)";
     ui.veredicto.className = `veredicto ${clases[r.estado] || "veredicto--verde"}`;
     ui.veredicto.innerHTML = `
       <p class="veredicto-encabezado">
@@ -264,6 +482,22 @@
       )} · puntuación ${Number(r.puntuacion)} de 100</p>
       <p class="veredicto-descripcion">${escapar(r.descripcion)}</p>
       <p class="veredicto-accion"><strong>${escapar(r.accion)}</strong></p>`;
+    const barra = document.querySelector("#medidor-veredicto .meter-barra");
+    const medidor = document.getElementById("medidor-veredicto");
+    const leyenda = document.getElementById("medidor-leyenda");
+    if (barra) barra.style.backgroundColor = colorBarra;
+    if (barra) barra.style.width = "0%";
+    if (medidor) medidor.hidden = false;
+    if (leyenda) leyenda.hidden = false;
+    setTimeout(() => {
+      if (barra) barra.style.width = `${Number(r.puntuacion)}%`;
+    }, 60);
+
+    /* anima el medidor tras un pequeño respiro */
+    setTimeout(() => {
+      const barra = ui.veredicto.querySelector(".meter-barra");
+      if (barra) barra.style.width = `${Number(r.puntuacion)}%`;
+    }, 60);
 
     const partes = [];
 
@@ -320,6 +554,27 @@
     ui.detalle.innerHTML = partes.join("");
   }
 
+  function copiarRecomendaciones() {
+    const lista = ui.detalle.querySelector(".recomendaciones");
+    if (!lista) return;
+    const textos = Array.from(lista.querySelectorAll("li")).map(
+      (li) => li.textContent
+    );
+    const textoPlano = textos.join("\n");
+    navigator.clipboard
+      .writeText(textoPlano)
+      .then(() => {
+        const original = ui.botonCopiar.textContent;
+        ui.botonCopiar.textContent = "Copiado";
+        setTimeout(() => {
+          ui.botonCopiar.textContent = original;
+        }, 1500);
+      })
+      .catch(() => {
+        mostrarToast("No se pudo copiar al portapapeles.");
+      });
+  }
+
   /* Resalta las señales sobre el texto enmascarado usando los offsets que
      entrega la API; si una señal no trae offsets, la busca por su frase. */
   function textoResaltado(texto, senales) {
@@ -354,7 +609,7 @@
     return segmentos.join("");
   }
 
-  /* ---------------- reinicio ---------------- */
+  /* ---------------- reinicio y retroceso ---------------- */
 
   function volverAEmpezar() {
     limpiarAviso();
@@ -364,8 +619,32 @@
     ui.detalle.innerHTML = "";
     ui.veredicto.className = "veredicto";
     ui.veredicto.innerHTML = "";
+    document.getElementById("medidor-veredicto")?.setAttribute("hidden", "");
+    document.getElementById("medidor-leyenda")?.setAttribute("hidden", "");
+    historialPasos = [1];
+    history.replaceState({ paso: 1 }, "", "#paso-1");
     irAPaso(1);
     ui.mensaje.focus();
+  }
+
+  function retrocederPaso() {
+    const actual = Object.entries(ui.secciones).find(
+      ([, seccion]) => !seccion.hidden
+    );
+    if (!actual) return;
+    const numeroActual = Number(actual[0]);
+    if (numeroActual === 2) {
+      irAPaso(1);
+      return;
+    }
+    if (numeroActual === 4) {
+      irAPaso(2);
+      return;
+    }
+    if (numeroActual === 3) {
+      irAPaso(2);
+      return;
+    }
   }
 
   /* ---------------- eventos ---------------- */
@@ -373,15 +652,64 @@
   document.querySelectorAll('input[name="modo"]').forEach((entrada) => {
     entrada.addEventListener("change", () => {
       limpiarAviso();
+      limpiarErrorDropzone();
       actualizarVisibilidadModo();
     });
   });
 
   ui.mensaje.addEventListener("input", actualizarContador);
   ui.botonPaso1.addEventListener("click", enviarDesdePaso1);
+
+  /* zona de lanzamiento: click abre el input oculto */
+  ui.zonaLanzamiento.addEventListener("click", () => {
+    ui.captura.click();
+  });
+  ui.botonElegirArchivo.addEventListener("click", (e) => {
+    e.stopPropagation();
+    ui.captura.click();
+  });
+
+  /* drag & drop visual */
+  ui.zonaLanzamiento.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    ui.zonaLanzamiento.classList.add("arrastrando");
+  });
+  ui.zonaLanzamiento.addEventListener("dragleave", () => {
+    ui.zonaLanzamiento.classList.remove("arrastrando");
+  });
+  ui.zonaLanzamiento.addEventListener("drop", (e) => {
+    e.preventDefault();
+    ui.zonaLanzamiento.classList.remove("arrastrando");
+    const archivos = e.dataTransfer.files;
+    if (archivos.length) seleccionarArchivo(archivos[0]);
+  });
+
+  ui.captura.addEventListener("change", () => {
+    const archivo = ui.captura.files?.[0];
+    if (archivo) seleccionarArchivo(archivo);
+  });
+
+  ui.quitarVista.addEventListener("click", quitarArchivo);
+
   ui.botonAnalizar.addEventListener("click", analizar);
-  ui.botonVolver.addEventListener("click", volverAEmpezar);
+  ui.botonVolverPaso2.addEventListener("click", () => {
+    irAPaso(1);
+  });
+  ui.botonAtrasPaso4.addEventListener("click", retrocederPaso);
+  ui.botonCopiar.addEventListener("click", copiarRecomendaciones);
   ui.botonOtro.addEventListener("click", volverAEmpezar);
+  ui.botonCancelar.addEventListener("click", () => {
+    if (controladorAborto) controladorAborto.abort();
+    detenerTemporizador();
+    irAPaso(2);
+    ui.revision.focus();
+  });
+
+  window.addEventListener("popstate", (evento) => {
+    if (evento.state && Number.isInteger(evento.state.paso)) {
+      irAPaso(evento.state.paso, { historial: false });
+    }
+  });
 
   actualizarContador();
   actualizarVisibilidadModo();

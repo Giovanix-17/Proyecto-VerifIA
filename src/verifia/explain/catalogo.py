@@ -21,19 +21,19 @@ NUMERO_EMERGENCIAS = "911"
 #: Dos recomendaciones que acompañan siempre al dictamen.
 GENERALES: tuple[str, ...] = (
     "Conservar el mensaje como evidencia (captura de pantalla) antes de borrarlo.",
-    "Ante cualquier duda, verificar por un canal oficial que usted consiga por su cuenta.",
+    "Ante cualquier duda, verifica por un canal oficial que tú consigas por tu cuenta.",
 )
 
 #: Tres o cuatro acciones concretas por tipología.
 POR_TIPOLOGIA: dict[str, tuple[str, ...]] = {
     "legitimo": (
-        "Verificar por el canal oficial si algo le parece raro.",
-        "No compartir datos si usted no inició el trámite.",
+        "Verifica por el canal oficial si algo te parece raro.",
+        "No compartas datos si no iniciaste el trámite.",
     ),
     "suplantacion_bancaria": (
         "No compartir códigos, NIP, token ni contraseñas.",
         "No entrar al enlace del mensaje.",
-        "Llamar al número del reverso de su tarjeta.",
+        "Llama al número del reverso de tu tarjeta.",
         "Revisar movimientos en la app oficial del banco.",
     ),
     "paqueteria_retenida": (
@@ -44,7 +44,7 @@ POR_TIPOLOGIA: dict[str, tuple[str, ...]] = {
     "oferta_laboral_fraudulenta": (
         "No pagar anticipos, capacitación ni equipo.",
         "No entregar INE, CURP ni datos bancarios antes de un contrato.",
-        "Verificar la empresa en su sitio oficial.",
+        "Verifica la empresa en su sitio oficial.",
     ),
     "extorsion": (
         "No responder ni negociar.",
@@ -56,16 +56,16 @@ POR_TIPOLOGIA: dict[str, tuple[str, ...]] = {
 
 #: Consecuencia de actuar conforme al mensaje, en una frase corta.
 CONSECUENCIAS: dict[str, str] = {
-    "legitimo": "Aun así, verifique por un canal oficial si algo le parece extraño.",
+    "legitimo": "Aun así, verifica por un canal oficial si algo te parece extraño.",
     "suplantacion_bancaria": (
-        "Si comparte el código, otra persona podría autorizar cargos en su cuenta."
+        "Si compartes el código, otra persona podría autorizar cargos en tu cuenta."
     ),
     "paqueteria_retenida": (
-        "Si paga o da sus datos en ese enlace, el cobro o el robo de datos puede "
+        "Si pagas o das tus datos en ese enlace, el cobro o el robo de datos puede "
         "ocurrir de inmediato."
     ),
     "oferta_laboral_fraudulenta": (
-        "Si adelanta dinero o entrega documentos, es muy probable que no recupere el pago."
+        "Si adelantas dinero o entregas documentos, es muy probable que no recuperes el pago."
     ),
     "extorsion": "Responder o pagar suele aumentar la presión y las exigencias.",
 }
@@ -81,7 +81,7 @@ TIPOLOGIA_LLANA: dict[str, str] = {
 
 #: Aviso obligatorio en todo resultado (regla 13).
 AVISO = (
-    "Resultado orientativo: no sustituye su criterio ni la denuncia formal "
+    "Resultado orientativo: no sustituye tu criterio ni la denuncia formal "
     "ante las autoridades."
 )
 

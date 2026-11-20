@@ -141,7 +141,10 @@ def extraer_texto_imagen(estado: EstadoServicio, datos: bytes) -> RespuestaOCR:
     del estado  # el OCR es local y no depende del modelo; firma uniforme
     borrador = pipeline_ocr.extraer_texto(datos)
     advertencias = [
-        _ADVERTENCIAS_OCR.get(codigo, codigo) for codigo in borrador.advertencias
+        _ADVERTENCIAS_OCR.get(
+            codigo, "La lectura de la imagen no fue muy segura; revisa el texto."
+        )
+        for codigo in borrador.advertencias
     ]
     return RespuestaOCR(
         texto_extraido=borrador.texto,
