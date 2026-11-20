@@ -4,7 +4,7 @@ Prototipo académico que analiza mensajes y capturas de pantalla en español mex
 para advertir sobre posibles fraudes o extorsiones digitales. Devuelve un semáforo de
 riesgo, la tipología probable, las señales de alerta y acciones seguras recomendadas.
 
-- **Institución:** Universidad Tecnológica de Tabasco (DATIC)
+- **Institución:** Universidad Tecnológica de Tabasco 
 - **Asignatura:** Fundamentos de Inteligencia Artificial
 - **Autor:** Giovani Hernández Arias
 - **Alcance:** prototipo local en `http://localhost:8000`; no es un servicio público
