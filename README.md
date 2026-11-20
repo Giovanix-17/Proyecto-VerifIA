@@ -9,6 +9,8 @@ riesgo, la tipología probable, las señales de alerta y acciones seguras recome
 - **Autor:** Giovani Hernández Arias
 - **Alcance:** prototipo local en `http://localhost:8000`; no es un servicio público
 
+![Demostración de VerifIA — interfaz web de 4 pasos](docs/reportes/figuras/Demostracion.png)
+
 ## Cómo funciona
 
 1. El texto se **sanitiza** antes de cualquier análisis: teléfonos, correos, nombres,
@@ -203,10 +205,6 @@ build, en `http://localhost:8000`. El flujo visible tiene cuatro pasos:
 2. Revisar y corregir el texto extraído por OCR.
 3. Analizar (estado de espera con el botón deshabilitado).
 4. Ver el semáforo, las señales resaltadas y las recomendaciones.
-
-![Demostración de la interfaz web de VerifIA](docs/reportes/figuras/Demostracion.png)
-
-> Figura: Interfaz de 4 pasos — paso 1: subir una captura de pantalla para analizar.
 
 | Endpoint | Uso |
 |---|---|
